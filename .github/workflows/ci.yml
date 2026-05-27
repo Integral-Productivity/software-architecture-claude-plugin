@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate plugin structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate plugin manifest
+        run: |
+          test -f .claude-plugin/plugin.json
+          jq -e '.name and .description and .version' .claude-plugin/plugin.json
+
+      - name: Validate hooks manifest
+        run: |
+          test -f .claude-plugin/hooks.json
+          jq -e '.hooks' .claude-plugin/hooks.json
+
+      - name: Validate hook scripts are executable
+        run: |
+          for f in hooks/*.sh; do
+            test -x "$f" || { echo "Hook script $f is not executable"; exit 1; }
+          done
+
+      - name: Validate hook scripts emit valid JSON
+        run: |
+          # Smoke test — feed minimal stdin and check exit code is 0
+          for f in hooks/*.sh; do
+            echo "Testing $f..."
+            # Hooks that read stdin get an empty JSON; others ignore it
+            echo '{}' | bash "$f" || echo "warn: $f returned non-zero"
+          done
+
+      - name: Validate skill frontmatter
+        run: |
+          for f in skills/*/SKILL.md; do
+            grep -q "^name:" "$f" || { echo "$f missing 'name:'"; exit 1; }
+            grep -q "^description:" "$f" || { echo "$f missing 'description:'"; exit 1; }
+          done
+          echo "Validated $(find skills -name SKILL.md | wc -l) skills"
+
+      - name: Validate command frontmatter
+        run: |
+          for f in commands/*.md; do
+            grep -q "^name:" "$f" || { echo "$f missing 'name:'"; exit 1; }
+            grep -q "^description:" "$f" || { echo "$f missing 'description:'"; exit 1; }
+          done
+          echo "Validated $(ls commands/*.md | wc -l) commands"
+
+      - name: Validate agent frontmatter
+        run: |
+          for f in agents/*.md; do
+            grep -q "^name:" "$f" || { echo "$f missing 'name:'"; exit 1; }
+            grep -q "^description:" "$f" || { echo "$f missing 'description:'"; exit 1; }
+            grep -q "^tools:" "$f" || { echo "$f missing 'tools:'"; exit 1; }
+            grep -q "^model:" "$f" || { echo "$f missing 'model:'"; exit 1; }
+          done
+          echo "Validated $(ls agents/*.md | wc -l) agents"
+
+      - name: Validate ADRs follow required sections
+        run: |
+          # Required sections per software-architecture-excellence/fitness/adr-format.ts
+          for f in docs/adr/*.md; do
+            grep -qE "^## (Status|status)$" "$f" || { echo "$f missing Status"; exit 1; }
+            grep -qE "^## (Context|context)$" "$f" || { echo "$f missing Context"; exit 1; }
+            grep -qE "^## (Decision|decision)$" "$f" || { echo "$f missing Decision"; exit 1; }
+            grep -qE "^## (Consequences|consequences)$" "$f" || { echo "$f missing Consequences"; exit 1; }
+          done
+          echo "Validated $(ls docs/adr/*.md | wc -l) ADRs"

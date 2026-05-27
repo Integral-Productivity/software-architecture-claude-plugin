@@ -1,0 +1,10 @@
+{
+  "name": "software-architecture",
+  "description": "Adaptive and evolutionary software architecture practice for the full SDLC. Grounded in Neal Ford's Fundamentals of Software Architecture and Software Architecture: The Hard Parts. Provides skills, commands, agents, and hooks for ADR capture, fitness functions, technology radar curation, multi-level architecture governance, and Hard Parts trade-off analysis — designed to embed architecture in the development process rather than running parallel to it.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Integral Productivity",
+    "email": "kraigparkinson@integralproductivity.com",
+    "url": "https://github.com/Integral-Productivity"
+  }
+}
