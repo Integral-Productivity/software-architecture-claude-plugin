@@ -21,10 +21,10 @@ depends on the routing table this command produces.
 
 2. **For each level present, identify the home** — walk through:
    - Enterprise / Cross-Cutting: where do org-wide standards live?
-     Default for Integral Productivity:
-     `software-architecture-excellence/docs/adr/` (SAE-).
-   - Platform / Cross-System: where does CI/DevOps live? Default:
-     `devops-excellence/docs/adr/` (ADR-).
+     (e.g. a shared `<your-org>/architecture-standards/docs/adr/`, with a
+     prefix like `ARCH-`). Ask the user for their actual repo + prefix.
+   - Platform / Cross-System: where does CI/DevOps live? (e.g. a
+     `<your-org>/platform/docs/adr/`, prefix like `PLAT-`). Ask for theirs.
    - System / Solution: this product's `docs/adr/`.
    - Service / Component: inside the service dir.
    - Code: not ADR'd (mention but don't require a path).

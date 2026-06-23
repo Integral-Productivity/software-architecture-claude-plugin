@@ -4,11 +4,12 @@
 
 This plugin is for **cross-product, cross-engagement architecture
 practice** — skills, agents, commands, and hooks that apply across
-multiple Integral Productivity products.
+multiple products or teams.
 
-Per [SAE-006](https://github.com/Integral-Productivity/software-architecture-excellence/blob/main/docs/adr/SAE-006-product-specific-claude-skills-as-in-product-plugins.md),
-**product-specific** content does not belong here — it lives in the
-product's own plugin.
+**Product-specific** content does not belong here — it lives in the
+product's own plugin. The dividing line: if a skill encodes the internals,
+data model, or stack of one specific product, it's product-specific; if it
+teaches a practice any product could apply, it belongs here.
 
 ## When to add a skill
 
@@ -69,14 +70,14 @@ listings.
 
 ### Branch naming
 
-- `claude/<slug>` for Claude-authored work (enables auto-merge per
-  global CLAUDE.md).
+- `claude/<slug>` for Claude-authored work (a convenient convention if your
+  CI uses it to gate auto-merge).
 - `adr/<slug>` for plugin-local ADR work.
 - `feat/<slug>`, `fix/<slug>`, `chore/<slug>` for human-authored work.
 
 ### Conventional Commits
 
-All commits use Conventional Commits per the IP standard:
+All commits use [Conventional Commits](https://www.conventionalcommits.org):
 `feat(scope):`, `fix:`, `chore:`, `docs:`, `ci:`.
 
 ## Testing
@@ -96,5 +97,6 @@ the routing.
 
 ## Distribution
 
-The plugin is distributed via `Integral-Productivity/marketplace-internal`.
-On merge to `main`, the marketplace's git integration auto-publishes.
+The plugin is published from this repository. Consumers add it as a plugin
+marketplace and install the `software-architecture` plugin (see the README).
+Merges to `main` are the release surface — keep `main` releasable.

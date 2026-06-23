@@ -8,43 +8,42 @@ Accepted
 
 ## Context
 
-Architectural practice across Integral Productivity is currently spread
-across:
+Architectural practice in an engineering organization is typically spread
+across several homes:
 
-- The `Integral-Productivity/skills` monorepo, which holds five
-  cross-cutting architecture skills (`engineering-adr`,
-  `engineering-architecture-fitness`, `engineering-tech-radar`,
-  `engineering-bdd`, `event-driven-ddd-modeling`).
-- `software-architecture-excellence`, which holds the canonical
-  Technology Radar and cross-cutting (SAE-) ADRs.
-- `devops-excellence`, which holds CI/DevOps (ADR-) decisions.
-- Product repos, which hold product-scoped ADRs.
+- A general skills/knowledge store holding cross-cutting architecture
+  skills (ADR practice, fitness functions, tech radar, BDD, event-driven
+  DDD modeling).
+- A standards repo holding the canonical Technology Radar and cross-cutting
+  ADRs.
+- A platform/DevOps repo holding CI/DevOps decisions.
+- Product repos holding product-scoped ADRs.
 
-The skills activate passively when a description matches a user's
-prompt, but **architecture is not embedded in the SDLC**:
+Skills activate passively when a description matches a user's prompt, but
+**architecture is not embedded in the SDLC**:
 
 - No hooks surface prior ADRs at the moment a new decision is being made.
 - No agents automatically search ADRs before planning.
 - No command surface walks a developer through a Hard Parts-grade
   trade-off analysis.
 - Multi-level governance (Enterprise / Platform / System / Service /
-  Code) is implicit, defined only in global `CLAUDE.md`.
+  Code) is implicit, defined only in scattered global configuration.
 
-SAE-006 established a precedent for dedicated Claude Code plugins
+There is an established precedent for dedicated Claude Code plugins
 distributing **product-specific** skills. This plugin extends that
 precedent to **practice-specific** content: cross-product knowledge that
 forms a coherent bundle and benefits from being shipped as one.
 
 The triggering case is a desire to operationalize Neal Ford's two books
 — *Fundamentals of Software Architecture* (both editions) and *Software
-Architecture: The Hard Parts* — as an active practice across the org,
-not just as references.
+Architecture: The Hard Parts* — as an active practice across an
+organization, not just as references.
 
 ## Decision
 
 We create a dedicated Claude Code plugin, **`software-architecture`**,
-hosted at `Integral-Productivity/software-architecture-claude-plugin` and
-distributed via `Integral-Productivity/marketplace-internal`.
+published from its own repository and installed as a Claude Code plugin
+marketplace.
 
 The plugin contains:
 
@@ -64,15 +63,14 @@ duplicate the inner engineering loops (TDD, code-review mechanics), Lean
 operational discipline, or CI/CD machinery, all of which live in other
 plugins or repos.
 
-Migration is staged in two PRs:
+Migration is staged in two steps:
 
-1. **Plugin creation (this PR):** content extracted into the plugin;
-   monorepo content still exists (transitional duplication is acceptable
-   for one PR cycle).
-2. **Monorepo cleanup (follow-up PR):** delete the 5 skills from the
-   monorepo; add `REGISTRY.md` redirects; file a new ADR in the monorepo
-   capturing the policy that practice-specific skills extract to
-   dedicated plugins (a new policy beyond SAE-006).
+1. **Plugin creation:** content extracted into the plugin; any pre-existing
+   copies in a general skills store still exist (transitional duplication is
+   acceptable for one cycle).
+2. **Source cleanup (follow-up):** delete the extracted skills from their
+   original home; add redirects; record the policy that practice-specific
+   skills extract to dedicated plugins.
 
 ## Consequences
 
@@ -86,7 +84,7 @@ Migration is staged in two PRs:
   thing; the whole practice activates.
 - **Multi-level governance is now first-class.** The
   `architecture-governance-levels` skill + `/software-architecture:context`
-  command make routing explicit, replacing the implicit-via-CLAUDE.md
+  command make routing explicit, replacing the implicit global-config
   convention.
 - **The plugin eats its own dogfood.** Decisions about the plugin's
   structure land as ADRs in `docs/adr/` of this repo.
@@ -96,8 +94,8 @@ Migration is staged in two PRs:
 
 ### Negative
 
-- **Migration cost.** The monorepo cleanup PR is real work; old skill
-  addresses (`engineering:adr`) won't work until users update.
+- **Migration cost.** The source-cleanup step is real work; old skill
+  addresses won't work until users update.
 - **Hook noise risk.** Five hooks fire frequently. If activation regexes
   are tuned poorly, users will disable hooks (opt-out is supported but
   defeats the purpose). Hook 2 in particular needs tuning against real
@@ -106,20 +104,20 @@ Migration is staged in two PRs:
   practice-specific plugins, future contributors may propose carving out
   more bundles (Lean, BDD-only, etc.). Each such proposal needs its own
   scoping ADR.
-- **Coupling to sibling repos.** Several skills and hooks expect
-  `~/GitHub/software-architecture-excellence` cloned locally. If it's
-  missing, behaviors degrade. The radar-as-database follow-up ADR will
-  address this.
+- **Coupling to external standards repos.** Several skills and hooks can
+  read an org's standards repo / custom radar when configured. If none is
+  configured, behaviors degrade gracefully. The radar-as-database follow-up
+  will harden this.
 
 ### Follow-ups (filed separately)
 
-- **Radar-as-database ADR** in `software-architecture-excellence/docs/adr/`
-  — replace the markdown radar with a structured store so hooks can
-  query without parsing markdown.
-- **Monorepo policy ADR** in `~/GitHub/skills/docs/adr/` — practice-
-  specific skills extract to dedicated plugins.
-- **Federation across orgs** — long-term, if Integral Productivity ever
-  publishes externally.
+- **Radar-as-database ADR** at the enterprise / cross-cutting level —
+  replace the markdown radar with a structured store so hooks can query
+  without parsing markdown.
+- **Source-policy ADR** in the originating skills store — practice-specific
+  skills extract to dedicated plugins.
+- **Federation across orgs** — long-term, for publishing the practice
+  beyond a single organization.
 
 ## Revisit Triggers
 

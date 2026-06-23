@@ -6,3 +6,9 @@ dist/
 .env.local
 coverage/
 .cache/
+
+# Local Claude Code state (settings, worktrees, session files — never ships;
+# may contain personal paths / machine-specific config). The plugin's tracked
+# Claude assets live in .claude-plugin/, not .claude/.
+.claude/
+.remember/

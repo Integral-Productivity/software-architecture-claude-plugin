@@ -48,10 +48,13 @@ if [[ -f "$REPO_ROOT/.adr-dir" ]]; then
   fi
 fi
 
-# Radar awareness
-RADAR_PATH="$HOME/GitHub/software-architecture-excellence/docs/tech-context/radar.md"
+# Radar awareness.
+# The org's custom Technology Radar location is configured via the
+# SA_RADAR_PATH env var (point it at your radar markdown file). If unset
+# or the file is absent, radar awareness degrades gracefully.
+RADAR_PATH="${SA_RADAR_PATH:-}"
 HAS_RADAR=false
-if [[ -f "$RADAR_PATH" ]]; then
+if [[ -n "$RADAR_PATH" && -f "$RADAR_PATH" ]]; then
   HAS_RADAR=true
 fi
 
@@ -72,7 +75,7 @@ if [[ "$HAS_RADAR" == "true" ]]; then
   if [[ -n "$MESSAGE" ]]; then
     MESSAGE+=" "
   fi
-  MESSAGE+="📊 IP Technology Radar available at ${RADAR_PATH}."
+  MESSAGE+="📊 Technology Radar available at ${RADAR_PATH}."
 fi
 
 # Emit nothing if nothing to say

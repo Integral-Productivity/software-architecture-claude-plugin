@@ -28,9 +28,9 @@ tags:
 
 ## Context
 
-A generic method (here: architecture-as-code — fitness functions, ADRs, characteristics) had forked across three places: the canonical `software-architecture` plugin, a deprecated `engineering-*` copy, and prose re-stated inside the `praxis` product plugin. The praxis skills declared themselves specializations of the *deprecated* names, so they pointed at a layer that was being retired, and the method drifted independently in each copy.
+A generic method (here: architecture-as-code — fitness functions, ADRs, characteristics) had forked across three places: the canonical `software-architecture` plugin, a deprecated `engineering-*` copy, and prose re-stated inside a product plugin that specializes the method. That product plugin's skills declared themselves specializations of the *deprecated* names, so they pointed at a layer that was being retired, and the method drifted independently in each copy.
 
-The forking was a known, deferred cost: the original extraction (2026-05-27, ADR-0002) chose "move the skills into a dedicated plugin, redirect via `REGISTRY.md`, rename them" but **deferred the consumer-side repoint and the monorepo cleanup** — and never accounted for a second consumer (praxis) that needed repointing. This pattern is what closed that gap. (session history)
+The forking was a known, deferred cost: the original extraction (2026-05-27, ADR-0002) chose "move the skills into a dedicated plugin, redirect via a registry, rename them" but **deferred the consumer-side repoint and the source-store cleanup** — and never accounted for a second consumer (the product plugin) that needed repointing. This pattern is what closed that gap. (session history)
 
 ## Guidance
 
@@ -47,7 +47,7 @@ When the same method lives in more than one plugin, converge on **one owner + po
 
 Dedup is the obvious win — improvements to the method compound to every consumer instead of drifting across copies. But the pattern introduces **three failure modes that are the real content of the decision**:
 
-- **Load-bearing install dependency.** Repointing trades a working-but-duplicated skill for a thinner one that is *strictly worse* when the owner plugin is absent — and absence bites at the consumer's most load-bearing moment (session-start framing). The session-start install instruction mitigates but cannot enforce this. The internal marketplace install path itself has friction (SSH + SAML-SSO by design, not a bug). (session history)
+- **Load-bearing install dependency.** Repointing trades a working-but-duplicated skill for a thinner one that is *strictly worse* when the owner plugin is absent — and absence bites at the consumer's most load-bearing moment (session-start framing). The session-start install instruction mitigates but cannot enforce this. (session history)
 - **Version skew.** If the owner is listed **unpinned** in the marketplace, the consumer floats on the owner's default-branch HEAD. A rename or section removal in the owner silently degrades every consumer session, and a stale-*old*-name check cannot detect a *new* broken pointer into the owner. Mitigate by pinning the marketplace entry to a tag/ref, or by recording a rename/deprecation contract the owner owes its consumers.
 - **Silent regression.** The repoint is a one-time edit unless enforced; the CI-gated check (step 5) is what makes "no stale references" a standing invariant rather than a fact that decays.
 
@@ -63,7 +63,7 @@ Do **not** strip a consumer skill to a pure pointer if the owner plugin cannot b
 
 Concrete instances from the worked case:
 
-- **Pointer-plus-delta repoint:** `praxis-architecture-fitness` and `praxis-platform-adr` strip the generic method and reference `software-architecture:*`, keeping only praxis constants (HubSpot/Inngest/LangSmith/Supabase, the `pnpm fitness` toolchain). Precedent for the pointer shape: `tdd-as-architectural-discipline` → `superpowers:test-driven-development` (a pointer-only skill from day one). (session history)
+- **Pointer-plus-delta repoint:** a product plugin's architecture skills strip the generic method and reference `software-architecture:*`, keeping only their domain constants and toolchain. Precedent for the pointer shape: `tdd-as-architectural-discipline` → `superpowers:test-driven-development` (a pointer-only skill from day one). (session history)
 - **By-kind mapping:** `engineering-adr` → `architecture-decision-records`; `engineering:architecture` / `engineering:system-design` (generic design) → `architectural-characteristics` / `architectural-trade-offs`, **not** `architecture-decision-records`.
 - **Enforcement check:** a static `no-decommissioned-skill-references` fitness check scanning every `SKILL.md` (frontmatter included), the session-start `CLAUDE.md`, and `evals.json`, returning a hard `fail` on any old name — wired into the CI fitness gate, not just a local run.
 
@@ -76,6 +76,5 @@ Concrete instances from the worked case:
 ## Related
 
 - [ADR-0003](../../adr/0003-single-source-architecture-method-and-repoint-consumers.md) — source of record (this plugin); [ADR-0002](../../adr/0002-establish-software-architecture-plugin-and-its-scope.md) — parent (the original extraction).
-- Issue [#2](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/2) (tracking), PR [#3](https://github.com/Integral-Productivity/software-architecture-claude-plugin/pull/3) (this repo's docs + ADR), [praxis#396](https://github.com/Integral-Productivity/praxis/pull/396) (the consumer repoint — live worked example), [skills#73](https://github.com/Integral-Productivity/skills/issues/73) (monorepo artifact cleanup residual).
-- `Integral-Productivity/skills` ADR-0004 — the practice-bundle extraction policy (extends SAE-006).
-- **Open at capture (2026-06-12):** the marketplace entry for the owner plugin was still unpinned (floating on HEAD); the version-pinning contract was an unresolved obligation. A future reader should check whether pinning landed.
+- Issue [#2](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/2) (tracking), PR [#3](https://github.com/Integral-Productivity/software-architecture-claude-plugin/pull/3) (this repo's docs + ADR).
+- **Open at capture (2026-06-12):** the distribution entry for the owner plugin was still unpinned (floating on HEAD); the version-pinning contract was an unresolved obligation. A future reader should check whether pinning landed.

@@ -111,8 +111,9 @@ offer to initialize: `adr init docs/adr`.
 - New ADR: `adr/<short-slug>`
 - Revision: `adr/<short-slug>/update`
 
-Per the Integral Productivity convention (CLAUDE.md), Claude-authored ADRs
-use the `claude/<slug>` prefix.
+If your workflow distinguishes agent-authored work (e.g. for auto-merge
+on green CI), apply that branch convention here too — for example a
+`claude/<slug>` prefix for Claude-authored ADRs.
 
 ## Options Evaluation
 
@@ -136,7 +137,7 @@ When the ADR involves selecting a technology, invoke
 The radar check provides:
 
 - Thoughtworks ring placement (Adopt / Trial / Assess / Hold)
-- IP custom radar placement
+- Your org's custom radar placement (if configured)
 - Recent movement signal (reassessed up or down)
 
 Include the radar findings in the options table. An option at "Hold" on the
@@ -168,10 +169,10 @@ for the full routing model. Quick rules:
 
 | Decision scope | Goes to |
 |---|---|
-| Cross-product / org-wide | `software-architecture-excellence/docs/adr/` (SAE-) |
-| CI / DevOps / platform | `devops-excellence/docs/adr/` (ADR-) |
+| Cross-product / org-wide | your shared standards repo's `docs/adr/` |
+| CI / DevOps / platform | your platform/DevOps repo's `docs/adr/` |
 | Product-specific | This product's `docs/adr/` |
 
-The `adr-historian` agent reads the routing table from the user's
-`~/.claude/CLAUDE.md` and/or repo-local `ARCHITECTURE.md` to find prior
-decisions at any level.
+The `adr-historian` agent reads the routing table from the repo-local
+`ARCHITECTURE.md` (produced by `/software-architecture:context`) to find
+prior decisions at any level.

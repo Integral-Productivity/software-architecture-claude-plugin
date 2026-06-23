@@ -25,11 +25,9 @@ already uses — you do not invent new patterns unless none exist.
 
 Look in this order:
 
-1. `<repo>/fitness/` — TypeScript / node:test style (see
-   `~/GitHub/software-architecture-excellence/fitness/adr-format.ts` as
-   the reference pattern).
-2. `<repo>/scripts/fitness/` — Python style (see
-   `~/GitHub/skills/scripts/fitness/` for reference).
+1. `<repo>/fitness/` — TypeScript / node:test style (a common reference
+   pattern is a `fitness/adr-format.ts` that asserts ADR template conformance).
+2. `<repo>/scripts/fitness/` — Python style.
 3. `<repo>/tests/fitness/` — alternative location.
 4. None — repo has no fitness apparatus yet. Bootstrap one. See "If
    bootstrapping" below.
@@ -62,9 +60,8 @@ characteristic the function protects.
 ### Step 4 — Add a test for the fitness function itself
 
 The fitness function itself needs a test. Follow the pattern in the
-repo's existing tests. For TypeScript with `node:test`, look at
-`software-architecture-excellence/fitness/adr-format.test.ts` as the
-reference.
+repo's existing tests. For TypeScript with `node:test`, a companion
+`fitness/adr-format.test.ts` that exercises the check is a typical shape.
 
 ### Step 5 — Run the new function
 
@@ -107,9 +104,8 @@ If the repo has no fitness apparatus:
    silently — bootstrapping a fitness runner is a significant project
    decision).
 
-2. Default style: TypeScript + `node:test` (matches the
-   `software-architecture-excellence` reference; matches IP Tech Radar
-   Adopt ring).
+2. Default style: TypeScript + `node:test` (a widely-adopted, low-dependency
+   choice). If the repo's stack differs, match it instead.
 
 3. Create:
    - `fitness/` directory at repo root
@@ -118,9 +114,9 @@ If the repo has no fitness apparatus:
    - `fitness/index.ts` — re-exports
    - Add a `pnpm fitness` or `npm run fitness` script
 
-4. Reference the
-   `software-architecture-excellence/fitness/adr-format.ts` pattern
-   verbatim in early bootstrap.
+4. Use a simple, self-contained first check (e.g. an `adr-format.ts`-style
+   assertion that every ADR matches the expected template) as the bootstrap
+   pattern.
 
 ## What you do NOT do
 

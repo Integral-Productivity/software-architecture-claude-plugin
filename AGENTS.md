@@ -12,7 +12,7 @@ practice (ADRs, fitness functions, technology radar, multi-level governance,
 Hard Parts trade-off analysis) delivered as skills, commands, agents, and hooks.
 Grounded in Neal Ford's *Fundamentals of Software Architecture* and *The Hard
 Parts*. Scope is **cross-product**; product-specific content lives in that
-product's own plugin (per SAE-006 — see CONTRIBUTING.md).
+product's own plugin (see CONTRIBUTING.md for the dividing line).
 
 ## Repo map
 
@@ -22,8 +22,8 @@ commands/      # /software-architecture:<verb> commands
 agents/        # adr-historian, fitness-author, architecture-reviewer
 hooks/         # 5 hooks (opt-out via SA_PLUGIN_HOOKS)
 docs/adr/      # ADRs about THIS plugin's own structure (dogfooding)
-docs/brainstorms/, docs/plans/   # ce-brainstorm / ce-plan artifacts
 docs/solutions/                  # documented solutions to past problems (see below)
+# docs/brainstorms/, docs/plans/ — created on demand by ce-brainstorm / ce-plan
 CONCEPTS.md                      # shared domain vocabulary (see below)
 ```
 
@@ -63,6 +63,6 @@ Full detail in [CONTRIBUTING.md](CONTRIBUTING.md). The essentials:
 
 ## Distribution
 
-Distributed via `Integral-Productivity/marketplace-internal`; merging to `main`
-auto-publishes. Installs over the internal marketplace use SSH + SAML-SSO by
-design — that is the intended auth posture, not a bug to route around.
+Published from this repository. Consumers add it as a Claude Code plugin
+marketplace and install the `software-architecture` plugin (see README).
+Merging to `main` is the release surface — keep `main` releasable.
