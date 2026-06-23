@@ -82,12 +82,24 @@ All commits use [Conventional Commits](https://www.conventionalcommits.org):
 
 ## Testing
 
-See `package.json` for the test command(s). Plugin tests cover:
+Run the suite with `npm test`. It uses Node's built-in test runner
+(`node:test` + `node:assert/strict`) — no third-party test framework, no
+install step beyond Node 20+. The tests live in `test/`:
 
-- Skill frontmatter validity (name, description present and non-empty)
-- Command frontmatter validity
-- Agent frontmatter validity (including `tools:` and `model:`)
-- Hook scripts are executable and emit valid JSON
+- **`frontmatter.test.mjs`** — every `skills/*/SKILL.md`, `commands/*.md`,
+  and `agents/*.md` has parseable YAML frontmatter with the required
+  non-empty fields: `name` + `description` for skills and commands; plus
+  `tools` + `model` for agents.
+- **`hooks.test.mjs`** — every `hooks/*.sh` is executable, parses cleanly
+  under `bash -n`, and on a representative stdin payload exits 0 emitting
+  only valid JSON (the JSON-emission checks need `jq`, the hooks' own
+  runtime dependency, and skip when it is absent).
+- **`manifest.test.mjs`** — `.claude-plugin/plugin.json` is valid JSON with
+  non-empty `name`/`description`/`version`, and every hook command in
+  `.claude-plugin/hooks.json` resolves to an executable script.
+
+The shared frontmatter reader and file-discovery helpers live in
+`test/lib/`.
 
 ## Architecture decisions about the plugin itself
 

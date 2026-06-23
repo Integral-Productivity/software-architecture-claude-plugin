@@ -1,0 +1,35 @@
+# Work-type-specific CI for this Claude plugin: runs the node:test suite
+# (frontmatter validity, hook scripts, manifest integrity). This is the
+# "additional workflow" the Tier 3 standard in ci.yml defers plugin
+# validation to — ci.yml stays the dependency-review floor.
+
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: npm test (node:test suite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # jq is the hooks' runtime dependency. ubuntu-latest ships it, but
+      # assert it so the hook JSON-emission checks always run (not skip).
+      - name: Ensure jq is available
+        run: jq --version
+
+      - name: Run tests
+        run: npm test

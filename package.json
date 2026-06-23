@@ -1,0 +1,11 @@
+{
+  "name": "software-architecture-claude-plugin",
+  "version": "0.1.0",
+  "description": "Tests for the software-architecture Claude Code plugin: skill/command/agent frontmatter validity, hook scripts, and manifest integrity.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "license": "MIT"
+}
