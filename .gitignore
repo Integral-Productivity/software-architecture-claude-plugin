@@ -6,3 +6,8 @@ dist/
 .env.local
 coverage/
 .cache/
+
+# Local Claude Code state (may contain personal paths / machine-specific config)
+.claude/settings.local.json
+.claude/worktrees/
+.remember/

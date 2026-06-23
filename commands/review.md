@@ -25,12 +25,13 @@ Run an architectural review of the current diff. The
 
 3. **Dispatch `architecture-reviewer` agent (Opus)** — pass:
    - The diff
-   - The routing table from `ARCHITECTURE.md` (if present) or CLAUDE.md
-   - Direct reference to:
-     - `~/GitHub/software-architecture-excellence/docs/adr/`
-     - `~/GitHub/devops-excellence/docs/adr/`
+   - The routing table from `ARCHITECTURE.md` (if present)
+   - Direct reference to the ADR homes and radar location named in
+     `ARCHITECTURE.md` — typically:
+     - The enterprise / cross-cutting standards repo's `docs/adr/`
+     - The platform / DevOps repo's `docs/adr/`
      - Current repo's `docs/adr/`
-     - `~/GitHub/software-architecture-excellence/docs/tech-context/radar.md`
+     - The org's custom radar file (if configured)
 
 4. **Surface the report** — agent returns a markdown report with:
    - **Prior ADRs touched** (with links)

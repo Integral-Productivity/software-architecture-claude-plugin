@@ -21,9 +21,10 @@ as it changes. The methodology is Neal Ford's *Building Evolutionary
 Architectures* tradition.
 
 This skill is framework-agnostic; it applies the methodology to any codebase
-or toolchain. For a worked example in TypeScript with `node:test`, see
-[`software-architecture-excellence/fitness/adr-format.ts`](https://github.com/Integral-Productivity/software-architecture-excellence/blob/main/fitness/adr-format.ts).
-For a Python example, see the skills monorepo's `scripts/fitness/`.
+or toolchain. A typical worked example is a TypeScript fitness check run with
+`node:test` (e.g. a `fitness/adr-format.ts` that asserts every ADR matches the
+expected template); the same pattern translates to a Python `scripts/fitness/`
+check or any test runner.
 
 For characteristics elicitation (the *what* before the *test*), see
 [`software-architecture:architectural-characteristics`](../architectural-characteristics/SKILL.md).

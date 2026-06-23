@@ -1,17 +1,22 @@
 # Architecture — Software Architecture Plugin
 
 **Last updated:** 2026-05-27
-**Owner:** Kraig Parkinson / Integral Productivity
+**Owner:** Integral Productivity
 
 This is the plugin's own `ARCHITECTURE.md` — produced by eating our own
 dogfood from `/software-architecture:context`.
 
 ## Governance Routing
 
+This plugin's own ADRs live at the System / Solution level (`./docs/adr/`).
+The other levels are filled in per-consuming-org via
+`/software-architecture:context`; the rows below show the *shape*, not
+specific repos.
+
 | Decision Level | Lives At | Prefix |
 |---|---|---|
-| Enterprise / Cross-Cutting | [`software-architecture-excellence/docs/adr/`](https://github.com/Integral-Productivity/software-architecture-excellence) | `SAE-` |
-| Platform / Cross-System | [`devops-excellence/docs/adr/`](https://github.com/Integral-Productivity/devops-excellence) | `ADR-` |
+| Enterprise / Cross-Cutting | your org's standards repo `docs/adr/` | org-defined |
+| Platform / Cross-System | your org's platform/DevOps repo `docs/adr/` | org-defined |
 | System / Solution (this plugin) | [`./docs/adr/`](docs/adr/) | numeric |
 | Service / Component | n/a — single-package repo | n/a |
 | Code | reflected in code structure | n/a |
@@ -24,8 +29,8 @@ interacts with:
 
 - **The user** — invokes commands, receives system reminders from hooks
 - **The user's repos** — reads `.adr-dir`, `docs/adr/`, dependency files
-- **Sibling IP repos** (`software-architecture-excellence`,
-  `devops-excellence`) — reads canonical radar and cross-cutting ADRs
+- **The consuming org's standards repos** (configured in `ARCHITECTURE.md`) —
+  reads the custom radar and cross-cutting ADRs, when present
 - **Other plugins** — delegates TDD inner-loop to
   `superpowers:test-driven-development`; coexists with `superpowers:*`
   meta-skills
@@ -67,12 +72,11 @@ The plugin's top characteristics (chosen via the
 
 | From | To | Why |
 |---|---|---|
-| `architectural-fitness-functions` skill | `software-architecture-excellence/fitness/adr-format.ts` | Worked example referenced |
-| `technology-radar` skill | `software-architecture-excellence/docs/tech-context/radar.md` | Canonical radar location |
-| `architecture-decision-records` skill | Cross-repo ADR routing via CLAUDE.md | Governance topology |
-| `adr-historian` agent | `~/GitHub/software-architecture-excellence/docs/adr/`, `~/GitHub/devops-excellence/docs/adr/` | Routing destinations |
-| Hook 3 (deps) | `software-architecture-excellence/docs/tech-context/radar.md` | Runtime read |
-| SAE-006 (Integral-Productivity) | This plugin's existence | Precedent for dedicated-repo distribution |
+| `architectural-fitness-functions` skill | a generic `fitness/adr-format.ts`-style check | Worked example pattern |
+| `technology-radar` skill | the org's custom radar (location in `ARCHITECTURE.md`) | Canonical radar location |
+| `architecture-decision-records` skill | Cross-repo ADR routing via `ARCHITECTURE.md` | Governance topology |
+| `adr-historian` agent | the ADR homes named in `ARCHITECTURE.md` | Routing destinations |
+| Hook 3 (deps) | the org's custom radar file (if configured) | Runtime read |
 
 ## Notes
 

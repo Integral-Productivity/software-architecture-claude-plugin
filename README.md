@@ -56,11 +56,16 @@ All commands use the `/software-architecture:` prefix.
 
 ## Installation
 
-Via the IP internal marketplace:
+Add this repository as a plugin marketplace, then install:
 
 ```
-/plugin install software-architecture@integral-productivity-internal
+/plugin marketplace add Integral-Productivity/software-architecture-claude-plugin
+/plugin install software-architecture
 ```
+
+Or clone the repo and add it as a local plugin path. See the
+[Claude Code plugin docs](https://docs.claude.com/en/docs/claude-code/plugins)
+for the current install mechanics.
 
 ## Setup
 
@@ -73,6 +78,20 @@ routing for your repo:
 
 This produces `ARCHITECTURE.md` at the repo root, which the
 `adr-historian` agent reads to find prior decisions.
+
+### Configuring a custom Technology Radar (optional)
+
+If your org maintains its own Technology Radar, point the plugin at it by
+setting `SA_RADAR_PATH` to the radar markdown file:
+
+```
+export SA_RADAR_PATH="$HOME/path/to/your-org/architecture-standards/docs/tech-context/radar.md"
+```
+
+The radar-aware hooks (SessionStart orientation, dependency-ring
+enforcement) read this path at runtime and degrade gracefully when it's
+unset. Record the same location in `ARCHITECTURE.md` so the skills and
+agents can find it too.
 
 ## Disabling individual hooks
 
@@ -113,11 +132,18 @@ The plugin is opinionated about three things:
 - `lean-management` — day-to-day operational discipline
 - `holacracy` — governance circles
 
-## Related repos
+## Bring your own standards repos
 
-- `software-architecture-excellence` — canonical IP Technology Radar +
-  cross-cutting ADRs (this plugin reads from)
-- `devops-excellence` — CI/DevOps ADRs (this plugin's routing references)
+This plugin's governance model routes decisions to *your* org's repos. It
+reads where those live from an `ARCHITECTURE.md` at your repo root, produced
+by the `/software-architecture:context` setup interview:
+
+- An **enterprise / cross-cutting** standards repo — your canonical Technology
+  Radar and org-wide ADRs.
+- A **platform / DevOps** repo — CI/DevOps ADRs.
+
+Neither is required to use the plugin; the model degrades gracefully when a
+level is absent.
 
 ## Contributing
 
@@ -125,4 +151,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-Internal use only (Integral Productivity).
+MIT — see [LICENSE](LICENSE).

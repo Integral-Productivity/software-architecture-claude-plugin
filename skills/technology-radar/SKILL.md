@@ -1,8 +1,8 @@
 ---
 name: technology-radar
 description: >
-  Evaluate technologies against the Thoughtworks Technology Radar and the IP
-  custom radar. Use when selecting a technology, comparing tools or frameworks,
+  Evaluate technologies against the Thoughtworks Technology Radar and your
+  org's custom radar. Use when selecting a technology, comparing tools or frameworks,
   checking whether a library is recommended, reviewing a dependency, doing a
   technology audit, or proposing a ring change. Invoke alongside
   `superpowers:brainstorming` when a technology choice is on the table, and
@@ -19,15 +19,16 @@ organizational experience. This skill checks two radars:
 
 1. **Thoughtworks Technology Radar** — the industry reference, updated twice
    yearly, covering thousands of technologies across four quadrants.
-2. **IP Custom Radar** — Integral Productivity's canonical radar at
-   `software-architecture-excellence/docs/tech-context/radar.md`. Captures
-   our adoption experience, organizational constraints, and toolchain
-   preferences.
+2. **Org Custom Radar** *(optional)* — your organization's own canonical
+   radar, capturing adoption experience, organizational constraints, and
+   toolchain preferences. Its location is configured per-repo in
+   `ARCHITECTURE.md` (via `/software-architecture:context`). If your org
+   doesn't maintain one, this skill works against the Thoughtworks radar alone.
 
 A technology that scores well on both radars is a safe, well-understood
-choice. A tension between radars (Thoughtworks says Adopt but IP says Hold)
-is a signal worth examining. A technology absent from both is an unknown
-that needs assessment before adoption.
+choice. A tension between radars (Thoughtworks says Adopt but your org says
+Hold) is a signal worth examining. A technology absent from both is an
+unknown that needs assessment before adoption.
 
 > **Note:** A future ADR ("radar-as-database") will replace the markdown
 > radar with a structured store, enabling the plugin's Hook 3 to query
@@ -82,26 +83,22 @@ Current radar: `https://www.thoughtworks.com/radar`.
 
 ---
 
-## IP Custom Radar
+## Org Custom Radar
 
-The canonical IP radar lives at
-[`software-architecture-excellence/docs/tech-context/radar.md`](https://github.com/Integral-Productivity/software-architecture-excellence/blob/main/docs/tech-context/radar.md).
+If your organization maintains its own radar, its location is recorded in
+the repo's `ARCHITECTURE.md` (under a "Technology Radar" entry, written by
+`/software-architecture:context`). A common pattern is a markdown file in a
+shared standards repo, e.g. `<your-org>/architecture-standards/docs/tech-context/radar.md`.
 
 ### Accessing the Radar
 
-**Preferred — read from the sibling clone:**
-```
-Read ~/GitHub/software-architecture-excellence/docs/tech-context/radar.md
-```
+1. Read the radar location from `ARCHITECTURE.md`.
+2. Read the radar file from the configured local path, or `WebFetch` it from
+   the configured URL if no local clone is present.
 
-**Fallback — fetch from GitHub if no local clone:**
-```
-WebFetch https://raw.githubusercontent.com/Integral-Productivity/software-architecture-excellence/main/docs/tech-context/radar.md
-```
-
-The plugin's Hook 3 (dep-file `PreToolUse`) also reads this file at runtime.
-If the file is missing locally and remote fetch is unavailable, the hook
-degrades gracefully.
+If no custom radar is configured, skip this section and evaluate against the
+Thoughtworks radar alone. The plugin's Hook 3 (dep-file `PreToolUse`) reads
+the configured radar at runtime and degrades gracefully when it's absent.
 
 ### Expected Format
 
@@ -115,8 +112,9 @@ Hold — each with a table:
 ### Proposing a Ring Change
 
 Significant ring movements (Adopt ↔ Hold, or anything changing default
-behavior across multiple repos) require an ADR in
-`software-architecture-excellence/docs/adr/` (SAE-NNN-).
+behavior across multiple repos) require an ADR at the enterprise /
+cross-cutting level — see `software-architecture:architecture-governance-levels`
+for where that lives in your org.
 
 Use `/software-architecture:radar` to scaffold both the radar edit and the
 companion ADR in one flow.
@@ -133,10 +131,10 @@ WebSearch: "<technology>" site:thoughtworks.com/radar
 
 Extract ring, quadrant, movement signal, rationale.
 
-### Step 2 — Look up IP radar
+### Step 2 — Look up your org's custom radar
 
-Read the canonical file (preferred) or fetch from GitHub. Extract ring,
-category, notes.
+If one is configured (see `ARCHITECTURE.md`), read the radar file or fetch
+it. Extract ring, category, notes. Skip this step if no custom radar exists.
 
 ### Step 3 — Present findings
 
@@ -149,9 +147,9 @@ Thoughtworks radar:
   Movement: <new|moved in|moved out|stable>
   Rationale: <one sentence from Thoughtworks>
 
-IP radar:
-  Ring: <Adopt|Trial|Assess|Hold|Not assessed>
-  Notes: <IP experience summary>
+Org radar:
+  Ring: <Adopt|Trial|Assess|Hold|Not assessed|Not configured>
+  Notes: <org experience summary>
 
 Assessment:
   <consistent / tension / not-on-radar>
@@ -164,11 +162,11 @@ Recommendation:
 
 If the two radars disagree, surface the tension explicitly:
 
-- **IP Hold overrides Thoughtworks Adopt** when there's a known
+- **Org Hold overrides Thoughtworks Adopt** when there's a known
   organizational constraint (licensing, cost, skills gap, bad integration
   experience).
-- **Thoughtworks Adopt overrides IP silence** when IP has no experience yet
-  and the technology is well-proven industry-wide.
+- **Thoughtworks Adopt overrides org silence** when your org has no
+  experience yet and the technology is well-proven industry-wide.
 - **Both Hold** = strong signal to avoid; document the reason in the ADR.
 
 ---

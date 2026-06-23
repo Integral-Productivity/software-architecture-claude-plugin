@@ -4,16 +4,15 @@
 #
 # When a tool call would modify package.json, pnpm-lock.yaml,
 # requirements.txt, go.mod, Cargo.toml, etc., diff added dependencies
-# against the IP Technology Radar.
+# against the org's custom Technology Radar.
 #
 # Hold ring → emit warning system reminder requesting user confirmation.
 # Trial ring → emit trial-conditions reminder.
 # Unknown → suggest /software-architecture:radar.
 # Adopt → silent (no reminder).
 #
-# Reads radar at runtime from
-# ~/GitHub/software-architecture-excellence/docs/tech-context/radar.md.
-# Degrades gracefully if file absent.
+# Reads the radar at runtime from the path in the SA_RADAR_PATH env var.
+# Degrades gracefully if unset or the file is absent.
 #
 # Opt-out: SA_PLUGIN_HOOKS not containing "deps".
 
@@ -46,13 +45,17 @@ if [[ "$DEP_FILE" == "false" ]]; then
   exit 0
 fi
 
-# Locate radar
-RADAR_PATH="$HOME/GitHub/software-architecture-excellence/docs/tech-context/radar.md"
+# Locate radar via the SA_RADAR_PATH env var (point it at your radar
+# markdown file). If unset, this hook stays silent — no radar, no enforcement.
+RADAR_PATH="${SA_RADAR_PATH:-}"
+if [[ -z "$RADAR_PATH" ]]; then
+  exit 0
+fi
 if [[ ! -f "$RADAR_PATH" ]]; then
   jq -n '{
     "hookSpecificOutput": {
       "hookEventName": "PreToolUse",
-      "additionalContext": "📊 Dependency file edit detected, but IP Technology Radar not found at ~/GitHub/software-architecture-excellence/. Cannot enforce ring policy. Clone the repo to enable Hold/Trial enforcement."
+      "additionalContext": "📊 Dependency file edit detected, but the Technology Radar configured in SA_RADAR_PATH was not found. Cannot enforce ring policy."
     }
   }'
   exit 0
@@ -114,16 +117,16 @@ UNKNOWNS="${UNKNOWNS%, }"
 MESSAGE=""
 
 if [[ -n "$HOLDS" ]]; then
-  MESSAGE+="🟥 **Hold-ring dependencies detected**: ${HOLDS}. The IP Technology Radar places these on **Hold**. Confirm with the user before proceeding, and consider filing a justification ADR if added intentionally. "
+  MESSAGE+="🟥 **Hold-ring dependencies detected**: ${HOLDS}. The Technology Radar places these on **Hold**. Confirm with the user before proceeding, and consider filing a justification ADR if added intentionally. "
 fi
 
 if [[ -n "$TRIALS" ]]; then
-  MESSAGE+="🟨 **Trial-ring dependencies**: ${TRIALS}. The IP Technology Radar places these on Trial. Note the trial conditions in any ADR. "
+  MESSAGE+="🟨 **Trial-ring dependencies**: ${TRIALS}. The Technology Radar places these on Trial. Note the trial conditions in any ADR. "
 fi
 
 if [[ -n "$UNKNOWNS" && -z "$HOLDS" && -z "$TRIALS" ]]; then
   # Only mention unknowns if no Hold/Trial; otherwise it's noise
-  MESSAGE+="📊 New dependencies (${UNKNOWNS}) not on IP Radar. Consider \`/software-architecture:radar\` to assess. "
+  MESSAGE+="📊 New dependencies (${UNKNOWNS}) not on the Radar. Consider \`/software-architecture:radar\` to assess. "
 fi
 
 if [[ -z "$MESSAGE" ]]; then

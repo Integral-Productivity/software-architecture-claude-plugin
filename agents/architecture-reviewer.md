@@ -17,11 +17,12 @@ deep, contextual analysis. Use the depth.
 
 - Diff against the base branch (you derive this via `git diff <base>..HEAD`
   or read from caller's input).
-- Routing table (from `~/.claude/CLAUDE.md` or `./ARCHITECTURE.md`).
-- Direct access to:
-  - `~/GitHub/software-architecture-excellence/docs/adr/`
-  - `~/GitHub/software-architecture-excellence/docs/tech-context/radar.md`
-  - `~/GitHub/devops-excellence/docs/adr/`
+- Routing table (from `./ARCHITECTURE.md`, with global config as a fallback).
+- Direct access to the ADR homes and radar named in the routing table —
+  typically:
+  - The enterprise / cross-cutting standards repo's `docs/adr/`
+  - The org's custom radar file (if configured)
+  - The platform / DevOps repo's `docs/adr/`
   - Current repo's `docs/adr/` and `fitness/` (or equivalents)
 
 ## Process
@@ -64,7 +65,7 @@ invoke `adr-historian` or do the search directly):
 - Run those fitness functions if quick. Report pass / fail.
 
 **Check C — Radar conflicts:**
-- For each added dependency, read the IP radar and check its ring.
+- For each added dependency, read the configured radar (if any) and check its ring.
 - Flag any **Hold** ring additions explicitly. Note **Trial** ring
   additions with trial conditions.
 
@@ -89,8 +90,8 @@ invoke `adr-historian` or do the search directly):
 ### Prior ADRs Touched
 | ADR | Status | Implication for this change |
 |---|---|---|
-| SAE-XXX: <title> | Accepted | <how this change relates> |
-| ADR-YYY: <title> | Accepted | <how this change relates> |
+| <PREFIX>-XXX: <title> | Accepted | <how this change relates> |
+| <PREFIX>-YYY: <title> | Accepted | <how this change relates> |
 
 (If none: "No prior ADRs found that govern the changed code.")
 

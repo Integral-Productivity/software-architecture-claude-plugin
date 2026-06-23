@@ -28,13 +28,18 @@ specific org, producing an `ARCHITECTURE.md` for the repo.
 
 ## The Five Levels
 
-| Level | Scope | Typical home (in Integral Productivity) |
+| Level | Scope | Typical home (example) |
 |---|---|---|
-| **Enterprise / Cross-Cutting** | Org-wide standards, tech radar, language defaults, governance | [`software-architecture-excellence/docs/adr/`](https://github.com/Integral-Productivity/software-architecture-excellence) — prefix `SAE-` |
-| **Platform / Cross-System** | CI/CD, DevOps, shared infrastructure, security baselines | [`devops-excellence/docs/adr/`](https://github.com/Integral-Productivity/devops-excellence) — prefix `ADR-` |
+| **Enterprise / Cross-Cutting** | Org-wide standards, tech radar, language defaults, governance | a shared standards repo, e.g. `<your-org>/architecture-standards/docs/adr/` — pick a prefix like `ARCH-` |
+| **Platform / Cross-System** | CI/CD, DevOps, shared infrastructure, security baselines | a platform/DevOps repo, e.g. `<your-org>/platform/docs/adr/` — pick a prefix like `PLAT-` |
 | **System / Solution** | A product's overall architecture | Product repo's own `docs/adr/` |
 | **Service / Component** | Internal structure of one bounded context | Inside the service directory |
 | **Code** | Module boundaries, packages, naming | Reflected in the code structure; rarely ADR'd |
+
+> The repo paths and prefixes above are *placeholders*. The
+> `/software-architecture:context` interview captures your org's real
+> routing into `ARCHITECTURE.md` — that file, not this table, is the
+> source of truth.
 
 Higher levels constrain lower levels. An Enterprise decision (e.g., "use
 TypeScript by default") constrains all System decisions. A System
@@ -64,11 +69,11 @@ Use both axes:
 
 ### Enterprise / Cross-Cutting
 
-**Authority:** Org-wide (in IP, the SAE governance circle).
+**Authority:** Org-wide (whoever owns cross-cutting standards).
 **Examples:**
-- "TypeScript is our default language" (SAE-)
-- "Anthropic Claude is our primary AI platform" (SAE-)
-- "Cross-product MCP patterns" (SAE-)
+- "TypeScript is our default language"
+- "Claude is our primary AI platform"
+- "Cross-product MCP patterns"
 - Technology Radar ring assignments
 
 **Smells that you're at this level:**
@@ -79,9 +84,9 @@ Use both axes:
 
 ### Platform / Cross-System
 
-**Authority:** Platform / DevOps (in IP, the DevEx circle).
+**Authority:** Platform / DevOps team.
 **Examples:**
-- CI tier structure (ADR-)
+- CI tier structure
 - GitHub Actions reusable workflows
 - Branch protection rules
 - Auto-merge policy
@@ -153,8 +158,8 @@ The command walks through:
    convention)?
 3. Are there gaps? (e.g., no Platform repo yet — note this and offer a
    bootstrap.)
-4. Are there cross-references (e.g., this product's ADRs reference SAE
-   decisions)?
+4. Are there cross-references (e.g., this product's ADRs reference
+   enterprise-level decisions)?
 
 Output: `ARCHITECTURE.md` at the repo root containing:
 
