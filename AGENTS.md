@@ -22,8 +22,8 @@ commands/      # /software-architecture:<verb> commands
 agents/        # adr-historian, fitness-author, architecture-reviewer
 hooks/         # 5 hooks (opt-out via SA_PLUGIN_HOOKS)
 docs/adr/      # ADRs about THIS plugin's own structure (dogfooding)
-docs/brainstorms/, docs/plans/   # ce-brainstorm / ce-plan artifacts
 docs/solutions/                  # documented solutions to past problems (see below)
+# docs/brainstorms/, docs/plans/ — created on demand by ce-brainstorm / ce-plan
 CONCEPTS.md                      # shared domain vocabulary (see below)
 ```
 
