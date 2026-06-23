@@ -58,8 +58,11 @@ Full detail in [CONTRIBUTING.md](CONTRIBUTING.md). The essentials:
   in `docs/adr/`. The plugin eats its own dogfood.
 - **Cross-references** between skills use the full namespace
   (`software-architecture:<skill-name>`), never the bare name.
-- **Testing:** see `package.json`. Tests cover frontmatter validity (skills,
-  commands, agents) and that hook scripts are executable and emit valid JSON.
+- **Testing:** `npm test` runs the `node:test` suite in `test/` (no
+  third-party deps). It checks frontmatter validity (skills, commands,
+  agents), that hook scripts are executable and emit valid JSON, and that
+  the `.claude-plugin/` manifests are valid JSON. See CONTRIBUTING.md for
+  the per-file breakdown.
 
 ## Distribution
 
