@@ -5,6 +5,14 @@
 # validate plugin manifests, tsc) lives in additional workflows owned by the
 # template's scaffold layer. The standard guarantees the dependency-review
 # floor only — every PR that touches deps gets vetted against the CVE feed.
+#
+# The dependency-review job is VENDORED INLINE here rather than calling
+# devops-excellence's reusable-dependency-review.yml. A PUBLIC repo cannot
+# resolve a reusable workflow hosted in the PRIVATE devops-excellence repo —
+# GitHub reports "workflow was not found" at workflow-load time, which fails
+# the whole run (startup failure). This repo is public (it is published as a
+# Claude Code plugin marketplace), so it inlines the job. See the tracking
+# issue in devops-excellence for the systemic fix to the Tier-3 standard.
 
 name: CI
 
@@ -19,7 +27,16 @@ jobs:
   dependency-review:
     name: Dependency Review
     if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
-    uses: Integral-Productivity/devops-excellence/.github/workflows/reusable-dependency-review.yml@main
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: moderate
+          comment-summary-in-pr: on-failure
