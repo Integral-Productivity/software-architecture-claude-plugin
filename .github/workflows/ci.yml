@@ -6,13 +6,15 @@
 # template's scaffold layer. The standard guarantees the dependency-review
 # floor only — every PR that touches deps gets vetted against the CVE feed.
 #
-# The dependency-review job is VENDORED INLINE here rather than calling
-# devops-excellence's reusable-dependency-review.yml. A PUBLIC repo cannot
-# resolve a reusable workflow hosted in the PRIVATE devops-excellence repo —
-# GitHub reports "workflow was not found" at workflow-load time, which fails
-# the whole run (startup failure). This repo is public (it is published as a
-# Claude Code plugin marketplace), so it inlines the job. See the tracking
-# issue in devops-excellence for the systemic fix to the Tier-3 standard.
+# The dependency-review reusable is consumed from the PUBLIC
+# Integral-Productivity/reusable-workflows repo, NOT from the private
+# devops-excellence repo. This repo is public (published as a Claude Code
+# plugin marketplace), and GitHub blocks a public repo from calling a
+# reusable workflow stored in a private/internal repo — the run fails at
+# startup ("workflow file issue", zero jobs) on every event. The public host
+# is the canonical fix per devops-excellence ADR-038 and its
+# public-private-reusable fitness check. See devops-excellence#297 for
+# repointing the Tier-3 template so future public adopters don't break.
 
 name: CI
 
@@ -27,16 +29,7 @@ jobs:
   dependency-review:
     name: Dependency Review
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
-    steps:
-      - name: Check out repo
-        uses: actions/checkout@v7
-
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v5
-        with:
-          fail-on-severity: moderate
-          comment-summary-in-pr: on-failure
+    uses: Integral-Productivity/reusable-workflows/.github/workflows/reusable-dependency-review.yml@main
