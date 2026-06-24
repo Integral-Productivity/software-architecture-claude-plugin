@@ -15,5 +15,10 @@ jobs:
   auto-merge:
     name: Auto-Merge
     uses: Integral-Productivity/reusable-workflows/.github/workflows/reusable-auto-merge.yml@main
+    # The public reusable declares the SCOPED token OP_AUTOMERGE_PUBLIC_TOKEN
+    # (read-only on the ip-automerge PEM alone), not the whole-vault
+    # OP_SERVICE_ACCOUNT_TOKEN. Passing an undeclared secret name fails the call
+    # at startup. See devops-excellence ADR-045. The token is required:false on
+    # the reusable, so a missing token fails closed and never blocks a PR.
     secrets:
-      OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+      OP_AUTOMERGE_PUBLIC_TOKEN: ${{ secrets.OP_AUTOMERGE_PUBLIC_TOKEN }}
