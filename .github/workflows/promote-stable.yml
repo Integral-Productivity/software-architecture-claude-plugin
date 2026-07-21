@@ -1,0 +1,22 @@
+name: Promote to stable
+
+# Thin caller — advances `stable` to a tagged release commit by a fast-forward
+# push AS the ip-releaser App (the bypass actor on the protected-stable org
+# ruleset). All logic lives in the public reusable so every plugin repo shares
+# one implementation. See devops-excellence ADR-064.
+#
+# The reusable forwards a SCOPED 1Password token (OP_RELEASER_PUBLIC_TOKEN,
+# read-only on the single-PEM ip-automation-public vault) — never the
+# whole-vault OP_SERVICE_ACCOUNT_TOKEN — so no broad credential traverses this
+# public runner (ADR-045).
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+' # pre-release suffixes (e.g. -rc.1) are excluded
+
+jobs:
+  promote:
+    uses: Integral-Productivity/reusable-workflows/.github/workflows/reusable-promote-stable.yml@v1
+    secrets:
+      OP_RELEASER_PUBLIC_TOKEN: ${{ secrets.OP_RELEASER_PUBLIC_TOKEN }}
