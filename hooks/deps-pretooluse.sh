@@ -84,9 +84,6 @@ HOLDS=""
 TRIALS=""
 UNKNOWNS=""
 
-# Read full radar once
-RADAR_TEXT="$(cat "$RADAR_PATH")"
-
 for CAND in $CANDIDATES; do
   # Skip obviously non-tech tokens
   if [[ "${#CAND}" -lt 3 ]]; then continue; fi
@@ -103,7 +100,12 @@ for CAND in $CANDIDATES; do
   # a ring. Notes-column prose names other rings' technologies on purpose
   # ("do not introduce Jest" sits in an Adopt row), so matching the whole
   # line would classify Hold technologies as Adopt.
-  RING="$(echo "$RADAR_TEXT" | awk -v cand="$CAND" '
+  #
+  # Redirect, do not pipe: awk exits at the first match, so a piped writer
+  # would take SIGPIPE once the radar exceeds the pipe buffer, and
+  # `pipefail` would abort the whole hook with exit 141 and no output --
+  # silently dropping the warning on exactly the large radars that need it.
+  RING="$(awk -v cand="$CAND" '
     BEGIN { cand = " " tolower(cand) " " }
     /^##[[:space:]]/ {
       section = ""
@@ -112,12 +114,12 @@ for CAND in $CANDIDATES; do
     }
     section == "" { next }
     /^[[:space:]]*\|/ {
-      split($0, cells, "|")
+      split($0, cells, "\\|")
       tech = tolower(cells[2])
       gsub("[^a-z0-9@/:._-]+", " ", tech)
       if (index(" " tech " ", cand) > 0) { print section; exit }
     }
-  ')"
+  ' < "$RADAR_PATH")"
 
   case "$RING" in
     Hold)   HOLDS+="${CAND}, " ;;

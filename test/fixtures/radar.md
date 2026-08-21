@@ -7,6 +7,8 @@ lookup in `hooks/deps-pretooluse.sh`. Two rows are deliberate traps:
   Hold-ring technology
 - the Adopt `esbuild` row's Notes column names **webpack**, which is on no
   ring at all
+- a trailing `## Retired` section follows `## Hold`, so a ring that leaked
+  across headings would misreport its rows as Hold
 
 Notes-column prose must never resolve a ring. Only the Technology cell counts.
 
@@ -35,3 +37,14 @@ Notes-column prose must never resolve a ring. Only the Technology cell counts.
 | Technology | Category | Notes |
 |---|---|---|
 | Jest | Testing | Use `node:test` instead |
+| `Bower` + `Grunt` | Build | Superseded; use the workspace toolchain |
+
+## Retired
+
+Not a ring. A technology listed here must resolve to nothing — entering a
+non-ring `##` section has to clear the current ring rather than leak Hold
+onto the rows below it.
+
+| Technology | Category | Notes |
+|---|---|---|
+| Gulp | Build | Removed from the radar entirely |
