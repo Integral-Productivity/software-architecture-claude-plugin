@@ -91,15 +91,33 @@ for CAND in $CANDIDATES; do
   # Skip obviously non-tech tokens
   if [[ "${#CAND}" -lt 3 ]]; then continue; fi
 
-  # Search in radar — case-insensitive
-  RING=""
-  if echo "$RADAR_TEXT" | grep -qiE "^\| [^|]*\b$(echo "$CAND" | sed 's/[][\.*^$()+?{}|]/\\&/g')\b" ; then
-    # Find which section this is in
-    SECTION=$(echo "$RADAR_TEXT" \
-      | awk -v cand="$(echo "$CAND" | sed 's/[][\.*^$()+?{}|]/\\&/g')" \
-        'BEGIN{IGNORECASE=1} /^## (Adopt|Trial|Assess|Hold)/{section=$2} $0 ~ "\\b"cand"\\b"{print section; exit}')
-    RING="$SECTION"
-  fi
+  # Resolve the candidate's ring.
+  #
+  # Portability: `\b` (word boundary) and `IGNORECASE` are gawk extensions.
+  # The awk shipped with macOS reads `\b` as a backspace escape and treats
+  # IGNORECASE as an inert variable, so a pattern built from them matches
+  # nothing at all. Lowercase both sides with tolower() and compare whole
+  # space-delimited tokens instead — POSIX awk everywhere.
+  #
+  # Scope: only the row's first `|`-delimited cell (Technology) can resolve
+  # a ring. Notes-column prose names other rings' technologies on purpose
+  # ("do not introduce Jest" sits in an Adopt row), so matching the whole
+  # line would classify Hold technologies as Adopt.
+  RING="$(echo "$RADAR_TEXT" | awk -v cand="$CAND" '
+    BEGIN { cand = " " tolower(cand) " " }
+    /^##[[:space:]]/ {
+      section = ""
+      if ($2 == "Adopt" || $2 == "Trial" || $2 == "Assess" || $2 == "Hold") section = $2
+      next
+    }
+    section == "" { next }
+    /^[[:space:]]*\|/ {
+      split($0, cells, "|")
+      tech = tolower(cells[2])
+      gsub("[^a-z0-9@/:._-]+", " ", tech)
+      if (index(" " tech " ", cand) > 0) { print section; exit }
+    }
+  ')"
 
   case "$RING" in
     Hold)   HOLDS+="${CAND}, " ;;
