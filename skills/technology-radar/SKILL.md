@@ -109,6 +109,18 @@ Hold — each with a table:
 |---|---|---|
 | TypeScript | Language | Default for all new projects |
 
+Hook 3 reads this shape literally, so two details are load-bearing:
+
+- **Ring headings are `## <Ring>`.** A row's ring comes from the nearest
+  preceding `## Adopt` / `## Trial` / `## Assess` / `## Hold`. Any other `##`
+  heading ends that section, and a differently written heading (`### Hold`,
+  `## 🟥 Hold`) resolves nothing.
+- **Only the Technology cell resolves a ring.** List every name a dependency
+  might be published under there; separators like backticks and `+` are fine.
+  A technology named only in the Notes column reads as *not on the radar* —
+  which is deliberate, so that prose such as "do not introduce Jest" in an
+  Adopt row cannot classify a Hold technology as Adopt.
+
 ### Proposing a Ring Change
 
 Significant ring movements (Adopt ↔ Hold, or anything changing default

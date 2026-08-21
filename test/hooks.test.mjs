@@ -12,8 +12,9 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { statSync, constants } from 'node:fs';
-import { basename, relative } from 'node:path';
+import { mkdtempSync, rmSync, statSync, writeFileSync, constants } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { basename, join, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { ROOT, hookFiles } from './lib/repo.mjs';
 
@@ -79,4 +80,140 @@ test('prompt-submit.sh emits valid hook JSON for an architectural-decision promp
       && parsed.hookSpecificOutput.additionalContext.length > 0,
     'expected a non-empty additionalContext reminder',
   );
+});
+
+// --- deps-pretooluse.sh ring lookup -----------------------------------------
+//
+// The ring lookup must work on any POSIX awk (mawk on CI, onetrue awk on
+// macOS), and it must read the ring from the row's *Technology* cell only.
+// `test/fixtures/radar.md` plants traps in Notes-column prose: the Adopt
+// `node:test` row says "do not introduce Jest", and the Adopt `esbuild` row
+// says "Prefer over webpack". Neither may resolve a ring. Its trailing
+// `## Retired` section pins the other half: a non-ring heading clears the
+// current ring instead of leaking Hold onto the rows below.
+
+const RADAR = join(ROOT, 'test', 'fixtures', 'radar.md');
+const DEPS_HOOK = HOOKS.find((h) => basename(h) === 'deps-pretooluse.sh');
+
+/** A PreToolUse payload for an Edit that adds `body` to a package.json. */
+function depsEdit(body) {
+  return JSON.stringify({
+    tool_name: 'Edit',
+    tool_input: { file_path: '/tmp/package.json', new_string: body },
+  });
+}
+
+/** Run the deps hook against the fixture radar and return additionalContext. */
+function ringContext(t, body) {
+  assert.ok(DEPS_HOOK, 'deps-pretooluse.sh should exist');
+  const result = runHook(DEPS_HOOK, depsEdit(body), {
+    SA_RADAR_PATH: RADAR,
+    SA_PLUGIN_HOOKS: 'deps',
+  });
+  assert.equal(result.status, 0, `exited ${result.status}:\n${result.stderr}`);
+  const out = result.stdout.trim();
+  if (out.length === 0) return '';
+  return JSON.parse(out).hookSpecificOutput?.additionalContext ?? '';
+}
+
+test('deps-pretooluse.sh resolves a Hold-ring dependency to Hold', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  const context = ringContext(t, '{"devDependencies":{"jest":"^29.0.0"}}');
+
+  assert.match(context, /Hold-ring dependencies detected/);
+  assert.match(context, /\bjest\b/);
+  // The Adopt row's "do not introduce Jest" prose must not win the lookup,
+  // and a resolved Hold must not also be reported as unseen.
+  assert.doesNotMatch(context, /not on the Radar/);
+});
+
+test('deps-pretooluse.sh resolves a Trial-ring dependency to Trial', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  const context = ringContext(t, '{"devDependencies":{"vitest":"^3.0.0"}}');
+
+  assert.match(context, /Trial-ring dependencies/);
+  assert.match(context, /\bvitest\b/);
+});
+
+test('deps-pretooluse.sh stays quiet about an Adopt-ring dependency', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  const context = ringContext(t, '{"devDependencies":{"typescript":"^5.0.0"}}');
+
+  assert.doesNotMatch(context, /typescript/i);
+});
+
+test('deps-pretooluse.sh will not resolve a ring from Notes-column prose', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  // `webpack` appears only in the Adopt row's Notes ("Prefer over webpack").
+  // It is on no ring, so it belongs in the unknown bucket, not in Adopt.
+  const context = ringContext(t, '{"devDependencies":{"webpack":"^5.0.0"}}');
+
+  assert.match(context, /not on the Radar/);
+  assert.match(context, /\bwebpack\b/);
+});
+
+test('deps-pretooluse.sh stays quiet about an Assess-ring dependency', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  // Assess shares the silent branch with Adopt, so it needs its own case.
+  const context = ringContext(t, '{"devDependencies":{"deno":"^2.0.0"}}');
+
+  assert.doesNotMatch(context, /deno/i);
+});
+
+test('deps-pretooluse.sh resolves a name inside a compound Technology cell', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  // The Hold cell is `` `Bower` + `Grunt` ``, the backticked style the real
+  // radar uses. Resolving `bower` proves the lookup normalizes punctuation and
+  // compares whole tokens, rather than matching the cell text as-is.
+  const context = ringContext(t, '{"devDependencies":{"bower":"^1.8.0"}}');
+
+  assert.match(context, /Hold-ring dependencies detected/);
+  assert.match(context, /\bbower\b/);
+});
+
+test('deps-pretooluse.sh does not leak a ring into a following non-ring section', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  // `Gulp` sits under `## Retired`, immediately after `## Hold`. Without the
+  // section reset it would inherit Hold and be reported as a banned dependency.
+  const context = ringContext(t, '{"devDependencies":{"gulp":"^5.0.0"}}');
+
+  assert.doesNotMatch(context, /Hold-ring dependencies detected/);
+  assert.match(context, /not on the Radar/);
+  assert.match(context, /\bgulp\b/);
+});
+
+test('deps-pretooluse.sh still reports Hold on a radar larger than the pipe buffer', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  // The lookup exits at the first match. Feeding the radar through a pipe made
+  // that exit kill the writer with SIGPIPE once the file outgrew the pipe
+  // buffer, and `pipefail` turned that into exit 141 with no output at all --
+  // the warning vanishing on exactly the biggest radars.
+  const dir = mkdtempSync(join(tmpdir(), 'sa-radar-'));
+  const bigRadar = join(dir, 'radar.md');
+  try {
+    const filler = Array.from(
+      { length: 8000 },
+      (_, i) => `| filler-pkg-${i} | Build | Padding row to grow the radar past the pipe buffer |`,
+    ).join('\n');
+    writeFileSync(
+      bigRadar,
+      `# Big radar\n\n## Hold\n\n| Technology | Category | Notes |\n|---|---|---|\n| Jest | Testing | Use \`node:test\` instead |\n${filler}\n`,
+    );
+    assert.ok(statSync(bigRadar).size > 512 * 1024, 'fixture radar should exceed any pipe buffer');
+
+    const result = runHook(DEPS_HOOK, depsEdit('{"devDependencies":{"jest":"^29.0.0"}}'), {
+      SA_RADAR_PATH: bigRadar,
+      SA_PLUGIN_HOOKS: 'deps',
+    });
+
+    assert.equal(result.status, 0, `exited ${result.status}:\n${result.stderr}`);
+    const out = result.stdout.trim();
+    assert.ok(out.length > 0, 'expected a Hold warning, not silence');
+    assert.match(
+      JSON.parse(out).hookSpecificOutput?.additionalContext ?? '',
+      /Hold-ring dependencies detected/,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
