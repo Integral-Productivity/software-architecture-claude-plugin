@@ -109,6 +109,8 @@ the routing.
 
 ## Distribution
 
-The plugin is published from this repository. Consumers add it as a plugin
-marketplace and install the `software-architecture` plugin (see the README).
-Merges to `main` are the release surface — keep `main` releasable.
+The plugin is published from this repository and catalogued in the public
+`Integral-Productivity/marketplace-labs` marketplace. Consumers add that
+marketplace and install `software-architecture@integral-productivity-labs`
+(see the README). Merges to `main` are the release surface — keep `main`
+releasable.
