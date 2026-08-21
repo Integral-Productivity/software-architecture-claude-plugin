@@ -56,11 +56,11 @@ All commands use the `/software-architecture:` prefix.
 
 ## Installation
 
-Add this repository as a plugin marketplace, then install:
+Add the `marketplace-labs` marketplace, then install:
 
 ```
-/plugin marketplace add Integral-Productivity/software-architecture-claude-plugin
-/plugin install software-architecture
+/plugin marketplace add Integral-Productivity/marketplace-labs
+/plugin install software-architecture@integral-productivity-labs
 ```
 
 Or clone the repo and add it as a local plugin path. See the
