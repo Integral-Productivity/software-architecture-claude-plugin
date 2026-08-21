@@ -69,11 +69,36 @@ fi
 
 # Build a list of candidate technology names mentioned in the new content.
 # Naive: extract quoted package names. Catches obvious npm-style deps.
-CANDIDATES=$(echo "$NEW_CONTENT" \
+#
+# A quoted token followed by `:` and an opening brace or bracket is manifest
+# structure, not a technology: `"dependencies": {` names the container that
+# holds packages, while `"lodash": "^4"` names one of them. Dropping container
+# keys keeps `dependencies` and its siblings out of both the radar lookup and
+# the message. Deriving them from the content beats a hardcoded denylist --
+# a denylist would also silence a real package that happens to share a name
+# with a manifest key, which is the same silent under-enforcement this hook
+# exists to prevent.
+#
+# `|| true` on each grep: finding nothing is an empty result, not a failure,
+# and under `set -o pipefail` a non-matching grep would otherwise abort the
+# hook with exit 1 instead of the contracted silent exit 0.
+CONTAINER_KEYS="$(echo "$NEW_CONTENT" \
+  | grep -oE '"[a-z@][a-z0-9@/_-]+"[[:space:]]*:[[:space:]]*[{[]' \
+  | tr -d '"' \
+  | sed 's/[[:space:]]*:.*$//' \
+  | sort -u || true)"
+
+CANDIDATES="$(echo "$NEW_CONTENT" \
   | grep -oE '"[a-z@][a-z0-9@/_-]+"' \
   | tr -d '"' \
-  | sort -u \
-  | head -50)
+  | sort -u || true)"
+
+if [[ -n "$CANDIDATES" && -n "$CONTAINER_KEYS" ]]; then
+  CANDIDATES="$(printf '%s\n' "$CANDIDATES" | grep -vxF "$CONTAINER_KEYS" || true)"
+fi
+
+# Cap after filtering, so the limit counts technologies rather than structure.
+CANDIDATES="$(printf '%s' "$CANDIDATES" | head -50)"
 
 if [[ -z "$CANDIDATES" ]]; then
   exit 0
