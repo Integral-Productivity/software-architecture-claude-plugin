@@ -1,0 +1,19 @@
+docs/agents/triage-labels.md
+  s_78deffbf7ee50b::t_a655adac612edf 1-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "9086493005e85ec657a204fce0425db23b44dfd7",
+  "prompts": {},
+  "sessions": {
+    "s_78deffbf7ee50b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fd414def-27f3-47a6-84e6-aa45be3dc7b2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Kraig Parkinson <kraigparkinson@integralproductivity.com>"
+    }
+  }
+}
