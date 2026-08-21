@@ -95,18 +95,18 @@ test('prompt-submit.sh emits valid hook JSON for an architectural-decision promp
 const RADAR = join(ROOT, 'test', 'fixtures', 'radar.md');
 const DEPS_HOOK = HOOKS.find((h) => basename(h) === 'deps-pretooluse.sh');
 
-/** A PreToolUse payload for an Edit that adds `body` to a package.json. */
-function depsEdit(body) {
+/** A PreToolUse payload for an Edit that adds `body` to a dependency file. */
+function depsEdit(body, filePath = '/tmp/package.json') {
   return JSON.stringify({
     tool_name: 'Edit',
-    tool_input: { file_path: '/tmp/package.json', new_string: body },
+    tool_input: { file_path: filePath, new_string: body },
   });
 }
 
 /** Run the deps hook against the fixture radar and return additionalContext. */
-function ringContext(t, body) {
+function ringContext(t, body, filePath) {
   assert.ok(DEPS_HOOK, 'deps-pretooluse.sh should exist');
-  const result = runHook(DEPS_HOOK, depsEdit(body), {
+  const result = runHook(DEPS_HOOK, depsEdit(body, filePath), {
     SA_RADAR_PATH: RADAR,
     SA_PLUGIN_HOOKS: 'deps',
   });
@@ -216,4 +216,68 @@ test('deps-pretooluse.sh still reports Hold on a radar larger than the pipe buff
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+// --- deps-pretooluse.sh candidate extraction ---------------------------------
+//
+// The extractor greps quoted lowercase tokens, which matches the object key
+// `"dependencies"` as readily as the package names nested inside it. A
+// manifest structural key is not a technology and must not reach the radar
+// lookup or the message.
+
+test('deps-pretooluse.sh does not report a manifest structural key as a technology', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  const context = ringContext(t, '{"dependencies":{"lodash":"^4.17.21"}}');
+
+  assert.doesNotMatch(context, /\bdependencies\b(?![ -])/);
+  assert.match(context, /\blodash\b/);
+});
+
+test('deps-pretooluse.sh drops structural keys from a pretty-printed manifest', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  // Real manifests put whitespace and a newline between the key and its brace.
+  const context = ringContext(t, '{\n  "dependencies": {\n    "lodash": "^4.17.21"\n  }\n}');
+
+  assert.doesNotMatch(context, /\bdependencies\b(?![ -])/);
+  assert.match(context, /\blodash\b/);
+});
+
+test('deps-pretooluse.sh still finds a Hold dependency beside a structural key', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  // Filtering containers must not filter their contents.
+  const context = ringContext(t, '{"dependencies":{"jest":"^29.0.0"}}');
+
+  assert.match(context, /Hold-ring dependencies detected/);
+  assert.match(context, /\bjest\b/);
+});
+
+test('deps-pretooluse.sh still extracts a quoted dependency from a non-JSON manifest', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  // A Gemfile has no `key: {` shape at all, so nothing may be filtered out.
+  const context = ringContext(t, 'gem "rails", "~> 7.1"', '/tmp/Gemfile');
+
+  assert.match(context, /\brails\b/);
+});
+
+test('deps-pretooluse.sh exits 0 when a dependency file yields no candidates', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  // grep exits 1 when it matches nothing, which `set -o pipefail` would turn
+  // into a failing hook instead of the contracted silent exit 0.
+  const result = runHook(DEPS_HOOK, depsEdit('NAME = "MyApp"', '/tmp/Cargo.toml'), {
+    SA_RADAR_PATH: RADAR,
+    SA_PLUGIN_HOOKS: 'deps',
+  });
+
+  assert.equal(result.status, 0, `exited ${result.status}:\n${result.stderr}`);
+  assert.equal(result.stdout.trim(), '', 'expected silence, not a warning');
+});
+
+test('deps-pretooluse.sh filters whole container keys, not substrings of names', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  // `dependencies-tree` merely contains the container key. Filtering by
+  // substring would drop a real package from the radar lookup entirely --
+  // the silent under-enforcement this hook exists to prevent.
+  const context = ringContext(t, '{"dependencies":{"dependencies-tree":"^1.0.0"}}');
+
+  assert.match(context, /\bdependencies-tree\b/);
 });
