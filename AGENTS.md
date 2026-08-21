@@ -66,6 +66,8 @@ Full detail in [CONTRIBUTING.md](CONTRIBUTING.md). The essentials:
 
 ## Distribution
 
-Published from this repository. Consumers add it as a Claude Code plugin
-marketplace and install the `software-architecture` plugin (see README).
-Merging to `main` is the release surface — keep `main` releasable.
+Published from this repository and catalogued in the public
+`Integral-Productivity/marketplace-labs` marketplace. Consumers add that
+marketplace and install `software-architecture@integral-productivity-labs`
+(see README). Merging to `main` is the release surface — keep `main`
+releasable.
