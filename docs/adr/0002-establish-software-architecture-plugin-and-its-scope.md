@@ -6,6 +6,11 @@ Date: 2026-05-27
 
 Accepted
 
+The distribution mechanism decided here — published from its own repository
+and installed as a Claude Code plugin marketplace — is superseded by
+[0004](0004-distribute-through-marketplace-labs-pinned-to-release-tags.md).
+The rest of this ADR stands.
+
 ## Context
 
 Architectural practice in an engineering organization is typically spread
