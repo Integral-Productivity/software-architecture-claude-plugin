@@ -8,6 +8,9 @@ Accepted
 
 Extends [0002](0002-establish-software-architecture-plugin-and-its-scope.md).
 
+The version contract left open here is resolved by
+[0004](0004-distribute-through-marketplace-labs-pinned-to-release-tags.md).
+
 ## Context
 
 [ADR-0002](0002-establish-software-architecture-plugin-and-its-scope.md)
