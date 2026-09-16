@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ADR Full Lifecycle — Ideation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg:#fbfaf8; --surface:#ffffff; --surface-2:#f4f2ee;
+    --ink:#1c1b19; --ink-2:#55524c; --ink-3:#817c74;
+    --rule:#e2ded7; --rule-2:#cfcac1;
+    --accent:#1f5f52; --accent-soft:#e3efeb; --accent-text:#154339;
+    --warn:#8a5a12; --warn-soft:#f6edda; --warn-text:#6c460c;
+    --info:#2b4f7a; --info-soft:#e4ecf6; --info-text:#1f3c5e;
+    --cut:#7a2f3a; --cut-soft:#f6e6e8; --cut-text:#5e222b;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --measure:70ch;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14161a; --surface:#1b1e23; --surface-2:#22262c;
+      --ink:#e9e6e1; --ink-2:#b4afa7; --ink-3:#8a857d;
+      --rule:#2e333a; --rule-2:#3d434c;
+      --accent:#7cc7b4; --accent-soft:#1c3630; --accent-text:#a7ded1;
+      --warn:#dfae62; --warn-soft:#3a2f1a; --warn-text:#f0cf95;
+      --info:#8fb6e6; --info-soft:#1c2a3d; --info-text:#b9d2f0;
+      --cut:#dd9aa4; --cut-soft:#3a2126; --cut-text:#eebcc3;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14161a; --surface:#1b1e23; --surface-2:#22262c;
+    --ink:#e9e6e1; --ink-2:#b4afa7; --ink-3:#8a857d;
+    --rule:#2e333a; --rule-2:#3d434c;
+    --accent:#7cc7b4; --accent-soft:#1c3630; --accent-text:#a7ded1;
+    --warn:#dfae62; --warn-soft:#3a2f1a; --warn-text:#f0cf95;
+    --info:#8fb6e6; --info-soft:#1c2a3d; --info-text:#b9d2f0;
+    --cut:#dd9aa4; --cut-soft:#3a2126; --cut-text:#eebcc3;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); font-size:15px; line-height:1.62;
+    font-feature-settings:"kern","liga","cv05";
+  }
+  .page{max-width:940px; margin-inline:auto; padding:48px 16px 96px}
+  p,li{max-width:var(--measure)}
+  h1,h2,h3,h4{line-height:1.25; letter-spacing:-0.012em; margin:0}
+  h1{font-size:2.05rem; font-weight:700; margin-bottom:10px}
+  h2{font-size:1.35rem; font-weight:650; margin:56px 0 16px; padding-bottom:9px; border-bottom:2px solid var(--rule)}
+  h3{font-size:1.1rem; font-weight:620}
+  a{color:var(--accent-text); text-decoration-thickness:1px; text-underline-offset:2px}
+  code{font-family:var(--mono); font-size:0.87em; background:var(--surface-2); padding:1px 5px; border-radius:4px; border:1px solid var(--rule)}
+  strong{color:inherit; font-weight:620}
+
+  .eyebrow{font-size:.72rem; font-weight:620; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3); margin-bottom:12px}
+  .meta{display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 6px}
+  .meta .pill{font-size:.78rem; background:var(--surface-2); border:1px solid var(--rule); border-radius:999px; padding:4px 12px; color:var(--ink-2)}
+  .meta .pill b{color:var(--ink); font-weight:600}
+  .lede{color:var(--ink-2); font-size:1.02rem; margin-top:18px}
+
+  .card{background:var(--surface); border:1px solid var(--rule); border-radius:12px; padding:20px 22px; margin:18px 0}
+  .tint-accent{background:var(--accent-soft); border-color:transparent}
+  .tint-accent, .tint-accent p, .tint-accent li{color:var(--accent-text)}
+  .tint-warn{background:var(--warn-soft); border-color:transparent}
+  .tint-warn, .tint-warn p, .tint-warn li{color:var(--warn-text)}
+  .tint-info{background:var(--info-soft); border-color:transparent}
+  .tint-info, .tint-info p, .tint-info li{color:var(--info-text)}
+
+  .grounding h3{font-size:.95rem; margin:20px 0 6px; color:var(--ink)}
+  .grounding h3:first-child{margin-top:0}
+  .grounding ul{margin:6px 0 0; padding-left:20px}
+  .grounding li{margin:4px 0; color:var(--ink-2)}
+
+  ol.axes{counter-reset:ax; list-style:none; padding:0; margin:0}
+  ol.axes li{counter-increment:ax; position:relative; padding:9px 0 9px 42px; border-bottom:1px solid var(--rule); max-width:none}
+  ol.axes li:last-child{border-bottom:0}
+  ol.axes li::before{content:counter(ax); position:absolute; left:0; top:9px; width:26px; height:26px; border-radius:7px;
+    background:var(--accent-soft); color:var(--accent-text); font-size:.8rem; font-weight:660; display:grid; place-items:center}
+  ol.axes b{display:block}
+  ol.axes span{color:var(--ink-2); font-size:.93rem}
+
+  .jump{background:var(--surface-2); border:1px solid var(--rule); border-radius:10px; padding:14px 18px; margin:0 0 26px}
+  .jump ol{margin:0; padding-left:20px; columns:1}
+  .jump li{margin:3px 0; font-size:.92rem; max-width:none}
+
+  article.idea{background:var(--surface); border:1px solid var(--rule); border-radius:14px; padding:24px 26px; margin:26px 0}
+  article.idea > header{display:flex; gap:12px; align-items:flex-start; margin-bottom:6px}
+  .rank{flex:none; width:30px; height:30px; border-radius:8px; background:var(--accent); color:var(--bg);
+    font-size:.88rem; font-weight:680; display:grid; place-items:center; margin-top:2px}
+  .chips{display:flex; flex-wrap:wrap; gap:7px; margin:12px 0 16px}
+  .chip{font-size:.74rem; font-weight:560; border-radius:999px; padding:3px 11px; border:1px solid transparent; letter-spacing:.01em}
+  .chip-axis{background:var(--info-soft); color:var(--info-text)}
+  .chip-conf{background:var(--accent-soft); color:var(--accent-text)}
+  .chip-cx{background:var(--surface-2); color:var(--ink-2); border-color:var(--rule)}
+  .field{margin:14px 0}
+  .field > .label{font-size:.72rem; font-weight:660; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-bottom:3px}
+  .field p{margin:0}
+  .basis{font-family:var(--mono); font-size:.83rem; background:var(--surface-2); border:1px solid var(--rule);
+    border-left:3px solid var(--accent); border-radius:6px; padding:11px 13px; color:var(--ink-2); max-width:none; overflow-wrap:anywhere}
+  .basis em{font-style:normal; color:var(--ink); font-weight:500}
+
+  figure{margin:22px 0; padding:0}
+  figure svg{display:block; width:100%; height:auto; background:var(--surface-2); border:1px solid var(--rule); border-radius:10px}
+  figcaption{font-size:.82rem; color:var(--ink-3); margin-top:8px; max-width:var(--measure)}
+
+  table{border-collapse:collapse; width:100%; margin:18px 0; font-size:.92rem}
+  th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--rule); vertical-align:top}
+  th{font-size:.74rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); font-weight:660; border-bottom:2px solid var(--rule-2)}
+  td:first-child{font-family:var(--mono); font-size:.84rem; color:var(--ink-3); white-space:nowrap}
+  tr.gap td{background:var(--cut-soft); color:var(--cut-text)}
+
+  footer.composition-signal{margin-top:64px; padding-top:18px; border-top:1px solid var(--rule);
+    font-size:.82rem; color:var(--ink-3)}
+
+  /* SVG shared */
+  .s-box{fill:var(--surface); stroke:var(--rule-2); stroke-width:1.5}
+  .s-box-accent{fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.5}
+  .s-box-info{fill:var(--info-soft); stroke:var(--info); stroke-width:1.5}
+  .s-box-warn{fill:var(--warn-soft); stroke:var(--warn); stroke-width:1.5}
+  .s-box-mute{fill:var(--surface-2); stroke:var(--rule-2); stroke-width:1.5; stroke-dasharray:4 4}
+  .s-t{font-family:var(--sans); font-size:12.5px; fill:var(--ink)}
+  .s-t-sm{font-family:var(--sans); font-size:11px; fill:var(--ink-2)}
+  .s-t-lab{font-family:var(--sans); font-size:11px; fill:var(--ink-3); font-weight:600; letter-spacing:.05em}
+  .s-t-hd{font-family:var(--sans); font-size:12px; fill:var(--ink); font-weight:640}
+  .s-t-mono{font-family:var(--mono); font-size:11px; fill:var(--ink-2)}
+  .s-line{stroke:var(--rule-2); stroke-width:1.6; fill:none}
+  .s-line-dash{stroke:var(--rule-2); stroke-width:1.6; fill:none; stroke-dasharray:5 4}
+  .halo{paint-order:stroke fill; stroke:var(--surface-2); stroke-width:3.5px; stroke-linejoin:round}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div class="eyebrow">Ideation · Compound Engineering</div>
+  <h1>ADR Full Lifecycle</h1>
+  <div class="meta">
+    <span class="pill"><b>Date</b> <time datetime="2026-09-16">2026-09-16</time></span>
+    <span class="pill"><b>Topic</b> adr-full-lifecycle</span>
+    <span class="pill"><b>Mode</b> repo-grounded</span>
+    <span class="pill"><b>Raw → survivors</b> 45 → 29 merged → 7</span>
+  </div>
+  <p class="lede"><b>Focus:</b> break out ADR support across the whole decision lifecycle — loading the
+  current state of decisions, shaping the drivers behind them, drafting a specific decision, reviewing and
+  refining the document, validating that teams follow it in practice, and eventual supersession or
+  retirement — plus a reviewer set checking well-formedness, technology-adoption governance,
+  product strategy, the -ilities, testability, evidence of spikes and prototypes, and multi-stakeholder
+  legibility.</p>
+</header>
+
+<section>
+<h2 id="grounding">Grounding Context</h2>
+
+<div class="card grounding">
+<h3>What exists today</h3>
+<ul>
+  <li>10 skills (<code>skills/&lt;name&gt;/SKILL.md</code>, all <code>status: draft</code>), 7 commands, 3 agents
+  (<code>adr-historian</code>, <code>architecture-reviewer</code>, <code>fitness-author</code>), 5 hooks, 4 ADRs in
+  <code>docs/adr/</code>, 3 <code>node:test</code> files.</li>
+  <li><b>Drafting is the strong stage.</b> <code>commands/decide.md</code> runs a 7-step flow; the ADR skill
+  teaches a six-question anatomy, a five-dimension options table, and an eight-item quality checklist.</li>
+  <li><b>Progressive disclosure exists in exactly one place</b> and was verified:
+  <code>skills/architectural-trade-offs/decision-archetypes/</code> is 5 files totalling 781 lines behind a
+  131-line parent, with a routing table and “Load only the archetype file you need.”</li>
+  <li>The reviewer runs exactly four lettered checks A–D, all scoped to the git diff, with severity flags
+  🟥 / 🟧 / 🟨 and an explicit contract: <em>“You do not gate merges. You surface findings; the user decides.”</em></li>
+</ul>
+
+<h3>Where the lifecycle stops</h3>
+<ul>
+  <li><b>Context-loading is filename-deep.</b> <code>hooks/session-start.sh</code> counts ADRs with
+  <code>find | wc -l</code> and picks “Latest” by sorting filenames. It never opens an ADR body — no statuses,
+  no supersession chains, no <code>Proposed</code> backlog.</li>
+  <li><b>Drivers have no home.</b> A search across the 63 tracked files finds no strategy, product, drivers,
+  requirements, principles, constraints or roadmap file. The characteristics skill says the prioritization
+  “IS an architectural decision” needing its own ADR — and no such ADR exists.</li>
+  <li><b>Document review is absent as a step.</b> The quality checklist is prose nothing executes;
+  <code>/review</code> checks the diff against ADRs, never the ADR text.</li>
+  <li><b>The taught format is in none of the real ADRs.</b> A grep for
+  <code>option|alternativ|considered|rejected|dimension</code> across all four <code>docs/adr/*.md</code> returns
+  zero matches — verified twice.</li>
+  <li><b>Evidence vocabulary is absent entirely.</b> A repo-wide grep for
+  <code>spike|prototype|proof of concept|PoC|benchmark</code> returns one hit, and it is an unrelated homonym
+  (“should handle spikes” → scalability).</li>
+  <li><b>Revisit triggers are write-only.</b> Every substantive ADR has them; nothing reads them. The one
+  trigger that ever fired was noticed by a human and narrated in prose inside a <em>successor</em> document.</li>
+  <li><b><code>fitness/adr-format</code> is named as the canonical worked example in three files</b> and no
+  <code>fitness/</code> directory exists. No test references <code>docs/adr/</code> at all.</li>
+  <li><b>A live routing bug.</b> <code>commands/decide.md</code> sends the historian to
+  <code>~/.claude/CLAUDE.md</code>; <code>agents/adr-historian.md</code>, <code>commands/review.md</code>, the README
+  and <code>docs/architecture.md</code> all make repo-local <code>./ARCHITECTURE.md</code> primary. This repo has no
+  root <code>ARCHITECTURE.md</code>.</li>
+</ul>
+
+<h3>Hard constraints every idea had to clear</h3>
+<ul>
+  <li><b>Cross-product only.</b> A skill that encodes one product's internals, data model or stack is
+  out of scope, so strategy and -ilities lenses must be taught generically.</li>
+  <li><b>Admission bars.</b> A new skill needs an activation phrase distinct from every existing skill; a new
+  command needs more than three steps; a new agent needs context isolation, heavy parallel work, or worktree
+  writes; a new hook needs strong signal-to-noise plus an <code>SA_PLUGIN_HOOKS</code> opt-out name.</li>
+  <li><b>ADR-0003 owns a rename contract toward consumers</b>, and ADR-0004 prices a breaking rename at a major
+  version bump plus a second PR in the marketplace repo and a designated release actor. Keeping the
+  <code>architecture-decision-records</code> name stable and decomposing beneath it avoids all of that.</li>
+</ul>
+
+<h3>Three claims verification knocked down</h3>
+<ul>
+  <li><b>ADRs carry no frontmatter at all.</b> They are plain adr-tools output, and
+  <code>test/lib/frontmatter.mjs</code> is explicitly not a YAML parser — flat scalars, block scalars and
+  comma-lists only, applied to skills, commands and agents, never to <code>docs/adr/</code>. Any idea resting on
+  nested ADR frontmatter is new machinery, not a field addition.</li>
+  <li><b>ADR-0002's “beyond ~15 skills” trigger has not fired.</b> The plugin is at 10. Proximity is a reason
+  for discipline, not urgency.</li>
+  <li><b>There is no scheduler.</b> None of the five workflows carries a <code>schedule:</code> or
+  <code>cron:</code> trigger; all CI is push- or PR-triggered. Any “periodic sweep” has to ride an existing
+  PR-triggered check.</li>
+</ul>
+</div>
+</section>
+
+<section>
+<h2 id="axes">Topic Axes</h2>
+<ol class="axes">
+  <li><b>Decision-state awareness</b><span>How the plugin loads, represents and surfaces what has already been decided.</span></li>
+  <li><b>Decision drivers</b><span>The repo-wide factors — prioritized -ilities, strategy, governance rings, constraints — that shape decisions before any single one is drafted.</span></li>
+  <li><b>Drafting and evidence</b><span>Shaping a specific decision: options development, archetypes, spikes and prototypes.</span></li>
+  <li><b>Review lenses</b><span>The reviewer set, and how lenses are structured, dispatched and reported.</span></li>
+  <li><b>Conformance and decision aging</b><span>Validating teams follow the decision in practice, plus revisit triggers, supersession and retirement.</span></li>
+</ol>
+</section>
+
+<section>
+<h2 id="ideas">Ranked Ideas</h2>
+
+<nav class="jump" aria-label="Ranked ideas">
+<ol>
+  <li><a href="#idea-1">Review lenses as a loadable catalog, split by decidability</a></li>
+  <li><a href="#idea-2">Ship <code>fitness/adr-format</code> — with the routing-table drift as its first assertion</a></li>
+  <li><a href="#idea-3">The evidence loop: an Evidence column where <code>assumed</code> is legal and printed</a></li>
+  <li><a href="#idea-4">Make decision state readable: status at session start, decisions at edit time</a></li>
+  <li><a href="#idea-5">Drivers as a numbered ADR — a utility tree the lenses can check against</a></li>
+  <li><a href="#idea-6">Right-size the ceremony: triage first, then tier by level × reversibility</a></li>
+  <li><a href="#idea-7">Decision aging without a scheduler</a></li>
+</ol>
+</nav>
+
+<!-- ───────────────────────── 1 ───────────────────────── -->
+<article class="idea" id="idea-1">
+<header><div class="rank">1</div><h3>Review lenses as a loadable catalog, split by decidability</h3></header>
+<div class="chips">
+  <span class="chip chip-axis">Review lenses</span>
+  <span class="chip chip-conf">Confidence 85%</span>
+  <span class="chip chip-cx">Complexity Medium</span>
+</div>
+
+<div class="field">
+<div class="label">Description</div>
+<p>Build the reviewer set as <code>review-lenses/*.md</code> — one file per lens behind a routing table inside the
+existing ADR skill — mirroring the <code>decision-archetypes/</code> shape exactly: trigger conditions, a rubric,
+a <code>## Hand-Off</code>. Then split the set by what kind of thing each lens is. Well-formedness, radar and
+governance cross-reference, testability, and evidence-presence are decidable from structure, so they run as
+fitness checks in CI and can fail a build. Product-strategy, -ilities alignment and stakeholder legibility are
+judgment, so they stay inside <code>architecture-reviewer</code> as advisory severity flags. Both halves share
+one lens vocabulary. Add a fourth verdict alongside pass, warn and block — <b>disclaimer of opinion</b>:
+“I could not obtain sufficient evidence to have a view.”</p>
+</div>
+
+<figure>
+<svg viewBox="0 0 820 330" role="img" aria-label="Seven review lenses split into a CI-gating group and an advisory group">
+  <text class="s-t-lab" x="16" y="18">REVIEW-LENSES/ · ONE FILE PER LENS</text>
+  <rect class="s-box-accent" x="16" y="30" width="196" height="30" rx="7"/><text class="s-t" x="28" y="50">well-formedness</text>
+  <rect class="s-box-accent" x="16" y="66" width="196" height="30" rx="7"/><text class="s-t" x="28" y="86">radar / governance</text>
+  <rect class="s-box-accent" x="16" y="102" width="196" height="30" rx="7"/><text class="s-t" x="28" y="122">testability</text>
+  <rect class="s-box-accent" x="16" y="138" width="196" height="30" rx="7"/><text class="s-t" x="28" y="158">evidence present</text>
+
+  <rect class="s-box-info" x="16" y="196" width="196" height="30" rx="7"/><text class="s-t" x="28" y="216">product strategy</text>
+  <rect class="s-box-info" x="16" y="232" width="196" height="30" rx="7"/><text class="s-t" x="28" y="252">-ilities alignment</text>
+  <rect class="s-box-info" x="16" y="268" width="196" height="30" rx="7"/><text class="s-t" x="28" y="288">stakeholder legibility</text>
+
+  <path class="s-line" d="M212 99 H 452" marker-end="url(#a1)"/>
+  <text class="s-t-sm halo" x="332" y="90" text-anchor="middle">decidable from structure</text>
+
+  <path class="s-line" d="M212 247 H 452" marker-end="url(#a1)"/>
+  <text class="s-t-sm halo" x="332" y="238" text-anchor="middle">judgment</text>
+
+  <rect class="s-box-accent" x="460" y="58" width="344" height="82" rx="10"/>
+  <text class="s-t-hd" x="476" y="84">fitness/adr-format — runs in CI</text>
+  <text class="s-t-sm" x="476" y="105">failures gate the merge</text>
+  <text class="s-t-mono" x="476" y="124">.github/workflows/test.yml · npm test</text>
+
+  <rect class="s-box-info" x="460" y="206" width="344" height="82" rx="10"/>
+  <text class="s-t-hd" x="476" y="232">architecture-reviewer — advisory</text>
+  <text class="s-t-sm" x="476" y="253">🟥 / 🟧 / 🟨 + disclaimer of opinion</text>
+  <text class="s-t-sm" x="476" y="272">surfaces findings; the user decides</text>
+
+  <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="var(--rule-2)"/></marker></defs>
+</svg>
+<figcaption>The same lens vocabulary, two enforcement mechanisms. The split is what lets the set gate without
+the advisory reviewer breaking its own stated contract.</figcaption>
+</figure>
+
+<div class="field">
+<div class="label">Basis</div>
+<div class="basis"><em>direct:</em> The <code>decision-archetypes/</code> precedent was measured and confirmed — 5 files,
+781 lines, behind a 131-line parent. The repo already contains the tension this resolves in two places:
+<code>agents/architecture-reviewer.md</code> states “You do not gate merges,” while
+<code>skills/evolutionary-architecture/SKILL.md</code> states fitness-check “Failures gate.” The report format
+already has an “(If none: …)” fallback idiom used four times, which is the precedent the disclaimer verdict
+extends. <em>external:</em> IETF directorate reviews — many fixed perspectives, one structured template per
+perspective, a graded verdict — and Zimmermann's “How to review ADRs,” which argues for multiple review
+perspectives rather than one reviewer.</div>
+</div>
+
+<div class="field">
+<div class="label">Rationale</div>
+<p>This is the direct answer to the user's numbered list, and the shape matters more than the list. Lenses-as-files
+is the only construction that honours the “etc.” — a new lens is a new file, not an amendment to an agent or a
+new skill — while clearing every admission bar, because a lens file is neither skill nor command nor agent. The
+decidability split is the part nobody would arrive at from the list alone: treating all seven as advisory
+guarantees the mechanical ones decay, and treating all seven as gates means blocking a merge on a legibility
+opinion. The disclaimer verdict is what keeps the strategy and evidence lenses honest in a repo that has no
+strategy artifact yet — without it they either fabricate approval or fabricate a finding.</p>
+</div>
+
+<div class="field">
+<div class="label">Downsides</div>
+<p>Two mechanisms means two places a lens can be defined and drift. The advisory half is only as good as the
+model reading it, and severity inflation is a real failure mode once seven lenses report at once. Shipping the
+well-formedness lens before the drafting fixes in idea 3 would fail all four in-repo ADRs on day one and teach
+the team the reviewer is noise — the sequencing is not optional.</p>
+</div>
+</article>
+
+<!-- ───────────────────────── 2 ───────────────────────── -->
+<article class="idea" id="idea-2">
+<header><div class="rank">2</div><h3>Ship <code>fitness/adr-format</code> — with the routing-table drift as its first assertion</h3></header>
+<div class="chips">
+  <span class="chip chip-axis">Conformance and decision aging</span>
+  <span class="chip chip-conf">Confidence 92%</span>
+  <span class="chip chip-cx">Complexity Low</span>
+</div>
+
+<div class="field">
+<div class="label">Description</div>
+<p>Build the check the plugin has been citing as its canonical worked example in three separate files and has
+never written. Give it two first occupants that both have real, present-tense failures: that every ADR matches
+the template the skill teaches, and that every surface naming the routing table agrees on which file it is.
+It runs inside the existing <code>node:test</code> suite — no new dependency, no new runner, no scheduler.</p>
+</div>
+
+<div class="field">
+<div class="label">Basis</div>
+<div class="basis"><em>direct:</em> Confirmed absent — no <code>fitness/</code>, <code>scripts/fitness/</code> or
+<code>tests/fitness/</code> directory exists anywhere, while <code>fitness/adr-format.ts</code> is named in
+<code>skills/architectural-fitness-functions/SKILL.md</code>, <code>agents/fitness-author.md</code> (twice) and
+<code>docs/architecture.md</code>. Confirmed drift — <code>commands/decide.md:19</code> cites only
+<code>~/.claude/CLAUDE.md</code> and never mentions <code>./ARCHITECTURE.md</code>, while
+<code>agents/adr-historian.md:20-25</code> makes <code>./ARCHITECTURE.md</code> primary with the global file as
+fallback. Confirmed gap — no test in <code>test/</code> references <code>docs/adr/</code>.</div>
+</div>
+
+<div class="field">
+<div class="label">Rationale</div>
+<p>The repo already wrote down its own law for this, in its own solutions store: a repoint “is a one-time edit
+unless enforced; the CI-gated check is what makes ‘no stale references’ a standing invariant rather than a fact
+that decays.” It has never applied that law to its own routing table, and the historian is being sent to the
+wrong file today as a result. This is also the cheapest possible proof of idea 1's mechanical half — it
+establishes the check, the runner and the reporting shape before any lens work depends on them.</p>
+</div>
+
+<div class="field">
+<div class="label">Downsides</div>
+<p>A naive template assertion fails immediately, and not only on the options table: the four existing ADRs are
+not internally consistent with each other — 0001 has no revisit-triggers section at all, 0002 uses an H2
+heading for it, and 0003 and 0004 use H3. Deciding what the check asserts means first deciding which of those
+is correct, which is real work disguised as a lint. Expect to ship it with a small number of assertions and
+grow it.</p>
+</div>
+</article>
+
+<!-- ───────────────────────── 3 ───────────────────────── -->
+<article class="idea" id="idea-3">
+<header><div class="rank">3</div><h3>The evidence loop: an Evidence column where <code>assumed</code> is legal and printed</h3></header>
+<div class="chips">
+  <span class="chip chip-axis">Drafting and evidence</span>
+  <span class="chip chip-conf">Confidence 80%</span>
+  <span class="chip chip-cx">Complexity Medium</span>
+</div>
+
+<div class="field">
+<div class="label">Description</div>
+<p>Add a sixth column to the taught options table whose legal values are <code>spike:</code>,
+<code>benchmark:</code>, <code>production:</code>, <code>prior-adr:</code> or <code>assumed</code>. The point is not
+to force a spike on every decision — it is to make unevidenced scoring <em>visible</em> on every review, exactly
+the way the fitness skill already handles unenforced characteristics with a declared gap. Pair it with two
+upstream changes: a <code>Proposed</code> ADR states the decisive experiment and the result that would settle it
+<em>before</em> the spike runs, and <code>/decide</code> pre-populates the options table from data it already
+computes — archetype integrator and disintegrator scores, radar rings — so the author edits a table instead of
+authoring one from nothing.</p>
+</div>
+
+<figure>
+<svg viewBox="0 0 820 250" role="img" aria-label="Evidence loop from proposed ADR through pre-registration and evidence to the lint">
+  <rect class="s-box" x="20" y="34" width="168" height="72" rx="10"/>
+  <text class="s-t-hd" x="36" y="62">Proposed ADR</text><text class="s-t-sm" x="36" y="82">options pre-filled</text>
+  <text class="s-t-sm" x="36" y="98">from archetype + radar</text>
+
+  <path class="s-line" d="M188 70 H 224" marker-end="url(#a3)"/>
+
+  <rect class="s-box-warn" x="228" y="34" width="176" height="72" rx="10"/>
+  <text class="s-t-hd" x="244" y="62">Pre-register</text><text class="s-t-sm" x="244" y="82">“what result would</text>
+  <text class="s-t-sm" x="244" y="98">decide this, either way?”</text>
+
+  <path class="s-line" d="M404 70 H 440" marker-end="url(#a3)"/>
+
+  <rect class="s-box" x="444" y="34" width="176" height="72" rx="10"/>
+  <text class="s-t-hd" x="460" y="62">Run it — or don't</text>
+  <text class="s-t-mono" x="460" y="82">spike: / benchmark:</text>
+  <text class="s-t-mono" x="460" y="98">production: / assumed</text>
+
+  <path class="s-line" d="M620 70 H 656" marker-end="url(#a3)"/>
+
+  <rect class="s-box-accent" x="660" y="34" width="144" height="72" rx="10"/>
+  <text class="s-t-hd" x="676" y="62">Evidence</text><text class="s-t-hd" x="676" y="80">column</text>
+  <text class="s-t-sm" x="676" y="98">on every option</text>
+
+  <path class="s-line-dash" d="M732 106 V 156" marker-end="url(#a3)"/>
+  <rect class="s-box-accent" x="228" y="160" width="576" height="56" rx="10"/>
+  <text class="s-t-hd" x="248" y="184">fitness/adr-format asserts the column exists and is non-empty</text>
+  <text class="s-t-sm" x="248" y="204">“assumed” passes the lint and stays visible to every reviewer — that is the whole mechanism</text>
+
+  <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="var(--rule-2)"/></marker></defs>
+</svg>
+<figcaption>Pre-registration binds the spike's outcome to a claim made before the outcome was known. The lint
+checks the column is filled, not that the answer was good.</figcaption>
+</figure>
+
+<div class="field">
+<div class="label">Basis</div>
+<div class="basis"><em>direct:</em> The evidence axis is empty and this was verified twice — a repo-wide grep for
+<code>spike|prototype|proof of concept|PoC|benchmark</code> returns exactly one hit, an unrelated homonym in the
+characteristics skill. The five taught dimensions (Complexity, Reversibility, Team familiarity, Operational
+overhead, Cost) are all judgments with no provenance column. Meanwhile the options table itself appears in
+<em>zero</em> of the four real ADRs, despite <code>skills/architectural-trade-offs/SKILL.md</code> already
+instructing that its Step-3 scoring table be handed off into “Options considered.” The
+<code>assumed</code> idiom is not invented: the fitness skill already specifies a declared gap “encoded with a
+<code>skip</code> result and a reason string — promises to self, not forgetting.”
+<em>external:</em> Bezos on one-way doors — “every day you keep a one-way door open you can gather evidence” —
+which gives the evidentiary bar a principled trigger proportional to irreversibility.</div>
+</div>
+
+<div class="field">
+<div class="label">Rationale</div>
+<p>This is the user's criterion 6, and it is the largest documented hole in the corpus: an architecture-practice
+plugin with no word for a spike is a machine for producing confident, unsourced comparison tables. It is also
+the diagnosis that makes the options-table failure tractable — the hand-off is already instructed and still isn't
+landing, so the problem is not missing guidance, it is that authoring a five-dimension table from a blank
+template predictably gets skipped. Pre-filling converts “author this” into “edit this.” And reusing the
+declared-gap convention means the fix ships as an idiom the plugin already teaches rather than a new discipline
+to adopt.</p>
+</div>
+
+<div class="field">
+<div class="label">Downsides</div>
+<p><code>assumed</code> is a permitted escape hatch, so a team can satisfy the letter of the lens while
+evidencing nothing; the countermeasure is counting <code>assumed</code> values, which is another thing to build.
+Pre-registration adds a step to a flow whose current problem is already that authors skip steps. Routing to a
+prototyping skill is a weaker fit than it first appears — <code>ce-prototype</code> is scoped to how something
+should work, feel or read, explicitly not to deciding what to build, and a decisive architecture benchmark is a
+different job.</p>
+</div>
+</article>
+
+<!-- ───────────────────────── 4 ───────────────────────── -->
+<article class="idea" id="idea-4">
+<header><div class="rank">4</div><h3>Make decision state readable: status at session start, decisions at edit time</h3></header>
+<div class="chips">
+  <span class="chip chip-axis">Decision-state awareness</span>
+  <span class="chip chip-conf">Confidence 84%</span>
+  <span class="chip chip-cx">Complexity Low</span>
+</div>
+
+<div class="field">
+<div class="label">Description</div>
+<p>Two moves on one axis. First, extend the session-start loop to read each ADR's <code>## Status</code> line and
+report a status mix and a <code>Proposed</code> backlog instead of a file count. Second — the bigger one — stop
+treating context-loading as a push at session start and make it a lookup at edit time: a <code>Write|Edit</code>
+pre-tool check that resolves which accepted decisions govern the path being edited and injects only those.
+Both surfaces carry the same payload: a required one-sentence Y-statement per ADR
+(“In the context of X, facing Y, we decided Z, to achieve Q, accepting D”), authored once by the decision's
+owner instead of improvised per query.</p>
+</div>
+
+<figure>
+<svg viewBox="0 0 820 280" role="img" aria-label="Before and after comparison of what the agent knows about decisions">
+  <rect class="s-box-mute" x="14" y="26" width="386" height="238" rx="12"/>
+  <text class="s-t-lab" x="30" y="16">TODAY</text>
+  <rect class="s-box" x="34" y="52" width="346" height="58" rx="8"/>
+  <text class="s-t-sm" x="50" y="74">session start</text>
+  <text class="s-t-mono" x="50" y="95">“📐 Repo has 4 ADRs. Latest: 0004-…”</text>
+  <rect class="s-box" x="34" y="132" width="346" height="58" rx="8"/>
+  <text class="s-t-sm" x="50" y="154">about to edit a governed file</text>
+  <text class="s-t-mono" x="50" y="175">(nothing)</text>
+  <text class="s-t-sm" x="34" y="228">Filenames only — no body is ever opened,</text>
+  <text class="s-t-sm" x="34" y="246">and the most relevant moment gets nothing.</text>
+
+  <rect class="s-box-accent" x="420" y="26" width="386" height="238" rx="12"/>
+  <text class="s-t-lab" x="436" y="16">PROPOSED</text>
+  <rect class="s-box" x="440" y="52" width="346" height="58" rx="8"/>
+  <text class="s-t-sm" x="456" y="74">session start</text>
+  <text class="s-t-mono" x="456" y="95">“4 ADRs · 3 Accepted, 1 part-superseded”</text>
+  <rect class="s-box" x="440" y="132" width="346" height="58" rx="8"/>
+  <text class="s-t-sm" x="456" y="154">about to edit a governed file</text>
+  <text class="s-t-mono" x="456" y="175">“ADR-0003 governs this path: …”</text>
+  <text class="s-t-sm" x="440" y="228">More relevant and less context at once —</text>
+  <text class="s-t-sm" x="440" y="246">the only combination that survives the research.</text>
+</svg>
+<figcaption>Session start is the least informed moment: it arrives before the agent knows what it will touch.
+Path-keyed injection is both more relevant and smaller.</figcaption>
+</figure>
+
+<div class="field">
+<div class="label">Basis</div>
+<div class="basis"><em>direct:</em> <code>hooks/session-start.sh:40-47</code> was read and does exactly
+<code>find … | wc -l</code> plus <code>find … | sort -r | head -3 | xargs basename</code> — no file body is opened.
+<code>.claude-plugin/hooks.json</code> was verified to already register a <code>Write|Edit</code> PreToolUse matcher
+(for <code>deps-pretooluse.sh</code>), so the shape being reused exists and needs no new hook. The historian's
+report template is confirmed to be “title — one-line why relevant,” where that line is improvised per query.
+<em>external:</em> Repowise's <code>get_why(path)</code> for agents before editing; and the 2026 “Context Matters”
+finding that context <em>selection</em> is the accuracy bottleneck and too much context degrades output — which
+makes path-keying an accuracy argument, not just a size one.</div>
+</div>
+
+<div class="field">
+<div class="label">Rationale</div>
+<p>The hook's own comment claims it replaces the manual “did I check the ADRs?” discipline, and it replaces only
+the counting half. The status read is a few lines of bash against a heading every ADR already has. The
+path-keyed lookup is the more consequential half and needs a <code>governs</code> pointer per ADR — which, kept
+as a flat comma-list, stays inside what the repo's existing frontmatter parser can read, unlike the richer
+decision-graph proposals that were cut for exactly this reason.</p>
+</div>
+
+<div class="field">
+<div class="label">Downsides</div>
+<p>A <code>governs</code> list is hand-maintained and will rot; a wrong path mapping is worse than none because
+it injects a confident irrelevance. Firing on every <code>Write|Edit</code> competes for attention with the
+dependency hook already on that matcher, and ADR-0002 names hook noise as a live negative with its own revisit
+trigger at more than two hooks disabled. The Y-statement is a required field that only helps if authors write
+it well.</p>
+</div>
+</article>
+
+<!-- ───────────────────────── 5 ───────────────────────── -->
+<article class="idea" id="idea-5">
+<header><div class="rank">5</div><h3>Drivers as a numbered ADR — a utility tree the lenses can check against</h3></header>
+<div class="chips">
+  <span class="chip chip-axis">Decision drivers</span>
+  <span class="chip chip-conf">Confidence 75%</span>
+  <span class="chip chip-cx">Complexity Medium</span>
+</div>
+
+<div class="field">
+<div class="label">Description</div>
+<p>The instinctive move is a new <code>STRATEGY.md</code> or drivers file. Do the opposite: ship the drivers as a
+numbered ADR, shaped as an ATAM-style utility tree — business goal, then quality-attribute scenarios, then
+prioritized characteristics each carrying its measurement. Every later ADR then cites a specific leaf. That
+gives lenses 3 and 4 something concrete to check alignment against, instead of an opinion about a document
+nobody wrote.</p>
+</div>
+
+<figure>
+<svg viewBox="0 0 820 320" role="img" aria-label="A drivers ADR shaped as a utility tree, cited by later ADRs">
+  <rect class="s-box-mute" x="14" y="26" width="540" height="272" rx="12"/>
+  <text class="s-t-lab" x="30" y="16">ADR-000N · DECISION DRIVERS</text>
+
+  <rect class="s-box-accent" x="34" y="136" width="150" height="54" rx="9"/>
+  <text class="s-t-hd" x="50" y="160">Business goal</text><text class="s-t-sm" x="50" y="178">stated once</text>
+
+  <path class="s-line" d="M184 163 H 214 M214 75 V 251 M214 75 H 250 M214 163 H 250 M214 251 H 250"/>
+
+  <rect class="s-box" x="254" y="48" width="286" height="54" rx="9"/>
+  <text class="s-t" x="268" y="70">Modifiability · <tspan font-weight="640">Firm</tspan></text>
+  <text class="s-t-sm" x="268" y="89">measured by: surfaces touched per change</text>
+
+  <rect class="s-box" x="254" y="136" width="286" height="54" rx="9"/>
+  <text class="s-t" x="268" y="158">Observability · <tspan font-weight="640">Firm</tspan></text>
+  <text class="s-t-sm" x="268" y="177">measured by: hook output is inspectable</text>
+
+  <rect class="s-box" x="254" y="224" width="286" height="54" rx="9"/>
+  <text class="s-t" x="268" y="246">Discoverability · <tspan font-weight="640">Soft</tspan></text>
+  <text class="s-t-sm" x="268" y="265">measured by: time to first correct invocation</text>
+
+  <path class="s-line-dash" d="M554 163 H 618" marker-end="url(#a5)"/>
+  <text class="s-t-sm halo" x="586" y="196" text-anchor="middle">cites a leaf</text>
+
+  <rect class="s-box-info" x="622" y="136" width="182" height="54" rx="9"/>
+  <text class="s-t-hd" x="636" y="160">Every later ADR</text>
+  <text class="s-t-mono" x="636" y="178">aligns_with: →</text>
+
+  <defs><marker id="a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="var(--rule-2)"/></marker></defs>
+</svg>
+<figcaption>Routing drivers through the ADR machinery gets versioning, supersession, governance-level routing
+and the historian for free — and makes “unstated driver” a detectable defect.</figcaption>
+</figure>
+
+<div class="field">
+<div class="label">Basis</div>
+<div class="basis"><em>direct:</em> <code>skills/architectural-characteristics/SKILL.md</code> already does
+business-goal-to-characteristic translation, forces a top-3-firm-plus-4-soft cut, states that the prioritization
+“IS an architectural decision; treat it like one,” and adds “measurement = no fitness function = not chosen.”
+Verification confirmed there is no characteristics-prioritization ADR among 0001–0004, and zero cross-link from
+<code>commands/decide.md</code> back to the characteristics skill. The plugin's own dogfooded
+<code>docs/architecture.md</code> carries a real Firm/Soft characteristics table — proving the gap is felt — with
+no ADR behind it. A filesystem search for strategy, product, drivers, requirements, constraints, principles,
+roadmap or charter files returns only that one file. <em>external:</em> ATAM utility tree (business drivers →
+quality-attribute scenarios → prioritized leaves); arc42 §10 and ISO 25010 for the quality vocabulary, used as a
+quality model rather than a record format — the 2026 template study ranked arc42 worst as an ADR template.</div>
+</div>
+
+<div class="field">
+<div class="label">Rationale</div>
+<p>This is the thinnest stage in the lifecycle and the second thing the user named. Inventing a new artifact type
+would also collide with the plugin's own stated anti-pattern about dumping decisions into the routing table. The
+Firm/Soft grading already exists as vocabulary and is completely inert — nothing consumes it. Making it the
+alignment target turns “alignment with the -ilities” from a subjective checkbox into a graded standard, and lets
+a Firm characteristic raise the evidentiary bar in idea 3 while a Soft one does not.</p>
+</div>
+
+<div class="field">
+<div class="label">Downsides</div>
+<p>It only works if <code>aligns_with</code> stays free text — a typed field runs into the same parser ceiling
+that cut the decision-graph ideas. A drivers ADR is also a decision that will itself need superseding, and
+prioritized characteristics are exactly the thing teams argue about longest, so the first one is expensive to
+land. And it cannot fix the product-strategy lens by itself: the plugin has no authority over a product's
+strategy document and must only point at one, per the cross-product scope line.</p>
+</div>
+</article>
+
+<!-- ───────────────────────── 6 ───────────────────────── -->
+<article class="idea" id="idea-6">
+<header><div class="rank">6</div><h3>Right-size the ceremony: triage first, then tier by level × reversibility</h3></header>
+<div class="chips">
+  <span class="chip chip-axis">Decision drivers</span>
+  <span class="chip chip-conf">Confidence 68%</span>
+  <span class="chip chip-cx">Complexity Medium</span>
+</div>
+
+<div class="field">
+<div class="label">Description</div>
+<p>Every other idea here raises the cost of an ADR, so add the control that makes them affordable. Put
+significance triage at step zero of <code>/decide</code> — the skill's own three triggers, which nothing
+currently runs — with a lightweight log for the decisions it turns away, so they are recorded rather than
+dropped. Then replace the binary “one-way doors get an ADR” rule with a tier computed from two values the
+plugin already has: the decision's governance level and its Reversibility score. The tier picks the template
+weight <em>and</em> which of idea 1's lenses apply.</p>
+</div>
+
+<figure>
+<svg viewBox="0 0 660 330" role="img" aria-label="Ceremony tier as a grid of governance level against reversibility">
+  <text class="s-t-lab" x="16" y="22">CEREMONY TIER</text>
+  <text class="s-t-sm" x="152" y="54">two-way door</text>
+  <text class="s-t-sm" x="302" y="54">mixed</text>
+  <text class="s-t-sm" x="452" y="54">one-way door</text>
+
+  <text class="s-t-sm" x="138" y="104" text-anchor="end">Enterprise</text>
+  <text class="s-t-sm" x="138" y="184" text-anchor="end">Platform</text>
+  <text class="s-t-sm" x="138" y="264" text-anchor="end">Service</text>
+
+  <rect class="s-box" x="150" y="66" width="150" height="70" rx="6"/>
+  <text class="s-t" x="164" y="106">standard</text>
+  <rect class="s-box-warn" x="300" y="66" width="150" height="70" rx="6"/>
+  <text class="s-t" x="314" y="106">full</text>
+  <rect class="s-box-warn" x="450" y="66" width="150" height="70" rx="6"/>
+  <text class="s-t" x="464" y="100">full — all lenses,</text><text class="s-t" x="464" y="118">evidence required</text>
+
+  <rect class="s-box-mute" x="150" y="146" width="150" height="70" rx="6"/>
+  <text class="s-t" x="164" y="186">light</text>
+  <rect class="s-box" x="300" y="146" width="150" height="70" rx="6"/>
+  <text class="s-t" x="314" y="186">standard</text>
+  <rect class="s-box-warn" x="450" y="146" width="150" height="70" rx="6"/>
+  <text class="s-t" x="464" y="186">full</text>
+
+  <rect class="s-box-mute" x="150" y="226" width="150" height="70" rx="6"/>
+  <text class="s-t" x="164" y="260">log only</text><text class="s-t-sm" x="164" y="279">no ADR</text>
+  <rect class="s-box-mute" x="300" y="226" width="150" height="70" rx="6"/>
+  <text class="s-t" x="314" y="266">light</text>
+  <rect class="s-box" x="450" y="226" width="150" height="70" rx="6"/>
+  <text class="s-t" x="464" y="266">standard</text>
+
+  <text class="s-t-sm" x="150" y="320">Triage runs before the grid: a decision failing all three ADR triggers never reaches it.</text>
+</svg>
+<figcaption>Both inputs already exist and are currently thrown away — level decides only where the file goes,
+never how much ceremony it gets.</figcaption>
+</figure>
+
+<div class="field">
+<div class="label">Basis</div>
+<div class="basis"><em>direct:</em> The binary is explicit — “Write an ADR for <b>one-way doors</b>” and
+“<b>Skip the ADR</b> for two-way doors.” Both inputs are confirmed present and independent: Reversibility is one
+of the five core options dimensions, and <code>skills/architecture-governance-levels/SKILL.md</code> states the
+level determines “which repo's <code>docs/adr/</code> is the right home … who has authority … how the decision
+propagates downward,” with “Higher levels constrain lower levels.” The three ADR-worthiness triggers are
+confirmed in the skill and confirmed to be run by nothing — <code>commands/decide.md</code> step 1 presupposes
+the ADR. <em>external:</em> the recurring RFC pattern of tiered templates — lightweight for team scope,
+heavyweight for org-wide — at Squarespace, Uber and Google.</div>
+</div>
+
+<div class="field">
+<div class="label">Rationale</div>
+<p>At scale the dominant failure of ADR programs is over-recording, not under-recording, and a seven-lens
+reviewer set applied uniformly is unusable at service level and under-specified at enterprise level. The plugin
+already computes both inputs and discards the combination. Triage is the other half: without a gate, improving
+the lifecycle makes the volume problem worse, and the rubric for it is already written — orphaned behind a
+reference to a skill this repo does not contain.</p>
+</div>
+
+<div class="field">
+<div class="label">Downsides</div>
+<p>Tiering is a policy, and the tier boundaries will be argued about more than they are used; a wrong tier
+silently skips the lens that would have caught the problem. Reversibility is self-scored by the author, so it is
+gameable in the direction of less work. And a triage gate that turns decisions away needs its log to be
+genuinely cheap, or it just becomes a second place where decisions go to be forgotten.</p>
+</div>
+</article>
+
+<!-- ───────────────────────── 7 ───────────────────────── -->
+<article class="idea" id="idea-7">
+<header><div class="rank">7</div><h3>Decision aging without a scheduler</h3></header>
+<div class="chips">
+  <span class="chip chip-axis">Conformance and decision aging</span>
+  <span class="chip chip-conf">Confidence 72%</span>
+  <span class="chip chip-cx">Complexity Medium</span>
+</div>
+
+<div class="field">
+<div class="label">Description</div>
+<p>Give the retirement stage — currently the one stage with literally zero mechanism — three inputs feeding one
+state. A revisit trigger written as a checkable predicate where one exists. A deterministic staleness signal:
+the paths a decision governs have newer commits than the decision itself, with no model in the loop. And a
+structured observed-outcome note appended to a live ADR — what we predicted, what actually happened, dated —
+so operating experience amends the decision by default instead of requiring a full supersession. Any of the
+three moves the ADR to <b>Revisit-due</b>, which the session-start briefing surfaces until someone re-affirms
+it with a dated line or supersedes it. It rides the existing PR-triggered test run, because this repo has no
+cron.</p>
+</div>
+
+<figure>
+<svg viewBox="0 0 780 290" role="img" aria-label="Three aging inputs converging on a revisit-due state with two exits">
+  <rect class="s-box" x="16" y="26" width="228" height="54" rx="9"/>
+  <text class="s-t" x="32" y="48">Revisit-trigger predicate</text><text class="s-t-sm" x="32" y="67">“if X exceeds Y…”</text>
+
+  <rect class="s-box" x="16" y="116" width="228" height="54" rx="9"/>
+  <text class="s-t" x="32" y="138">Governed paths are newer</text><text class="s-t-sm" x="32" y="157">deterministic — no model involved</text>
+
+  <rect class="s-box" x="16" y="206" width="228" height="54" rx="9"/>
+  <text class="s-t" x="32" y="228">Observed-outcome note</text><text class="s-t-sm" x="32" y="247">predicted vs actual, dated</text>
+
+  <path class="s-line" d="M244 53 H 296 Q 316 53 316 96 V 126" marker-end="url(#a7)"/>
+  <path class="s-line" d="M244 143 H 336" marker-end="url(#a7)"/>
+  <path class="s-line" d="M244 233 H 296 Q 316 233 316 190 V 162" marker-end="url(#a7)"/>
+
+  <rect class="s-box-warn" x="340" y="116" width="160" height="54" rx="9"/>
+  <text class="s-t-hd" x="358" y="140">Revisit-due</text><text class="s-t-sm" x="358" y="158">surfaced every session</text>
+
+  <path class="s-line" d="M500 143 H 552 Q 572 143 572 110 V 88" marker-end="url(#a7)"/>
+  <path class="s-line" d="M500 143 H 552 Q 572 143 572 176 V 198" marker-end="url(#a7)"/>
+
+  <rect class="s-box-accent" x="596" y="60" width="168" height="54" rx="9"/>
+  <text class="s-t" x="612" y="82">Re-affirmed</text><text class="s-t-sm" x="612" y="101">a dated one-line commit</text>
+
+  <rect class="s-box-info" x="596" y="196" width="168" height="54" rx="9"/>
+  <text class="s-t" x="612" y="218">Superseded</text><text class="s-t-mono" x="612" y="237">adr new -s &lt;old&gt;</text>
+
+  <defs><marker id="a7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="var(--rule-2)"/></marker></defs>
+</svg>
+<figcaption>Amendment is the default and supersession the escalation — a supersession-only channel is too
+expensive to use, which is why the one real failure sat unreported for the life of the repo.</figcaption>
+</figure>
+
+<div class="field">
+<div class="label">Basis</div>
+<div class="basis"><em>direct:</em> The skill's own wording is already a covenant definition — revisit triggers are
+“specific, measurable conditions … not ‘we might reconsider someday’ but ‘if X exceeds Y, evaluate alternative
+Z.’” The ADRs write them that way, and nothing reads them: the one firing on record was noticed by a human and
+narrated as prose inside a successor document. The repo also contains a textbook adverse event discovered years
+late — ADR-0004 records that ADR-0002's mechanism “never worked … absent at HEAD and absent at every revision in
+history. The decision was recorded but never realized” — plus a live, self-reported, unrouted one: “Nothing
+enforces the match.” The expiry pattern already exists for a different object: “every flag has an expiration
+date — flags older than N months fail fitness.” <em>external:</em> Repowise's deterministic staleness rule, and
+post-market surveillance, where a drug's label accumulates real-world evidence without the drug being withdrawn.
+</div>
+</div>
+
+<div class="field">
+<div class="label">Rationale</div>
+<p>“Recorded but never realized” is a failure neither existing mechanism catches: conformance review compares the
+diff to the ADR, so it never fires for a decision that produced no diff at all, and supersession requires
+someone to already know the decision is wrong. The deterministic staleness signal is the one input here that
+costs nothing and cannot hallucinate. And the plugin telling its users to expire their feature flags while
+having never expired a decision is the whole argument for this stage in one line.</p>
+</div>
+
+<div class="field">
+<div class="label">Downsides</div>
+<p>Verification found no <code>schedule:</code> or <code>cron:</code> anywhere in the five workflows, so the
+“periodic” framing had to be dropped — aging only gets evaluated when someone opens a PR, which means a
+quiescent repo ages silently. Only a subset of triggers are ever going to be machine-checkable (“a second
+consumer plugin repoints” is not), and it must be explicit that the unstructured ones stay unevaluated rather
+than implying coverage that does not exist. A <code>Revisit-due</code> state that nobody clears becomes
+background noise within a quarter.</p>
+</div>
+</article>
+</section>
+
+<section>
+<h2 id="rejected">Rejection Summary</h2>
+<p>Eleven candidates were cut after adversarial verification against the repo. Three were cut because
+verification contradicted a factual claim they rested on.</p>
+<table>
+<thead><tr><th>#</th><th>Idea</th><th>Reason rejected</th></tr></thead>
+<tbody>
+<tr><td>C1</td><td>Typed decision graph in ADR frontmatter</td><td><b>Basis overstated.</b> ADRs carry no frontmatter at all, and <code>test/lib/frontmatter.mjs</code> is explicitly not a YAML parser — nested <code>partially_supersedes{scope}</code> and <code>options[]</code> need machinery the idea presented as a field addition. Its flat-scalar elements survive inside ideas 4 and 7.</td></tr>
+<tr><td>C2</td><td>“Distinguished by ADR-NNN” as a third state</td><td>Prose already handles partial supersession adequately in three of four ADRs; naming a vocabulary term for it is a bikeshed beside the general move, and fails the meeting test.</td></tr>
+<tr><td>C4</td><td>Finding aid asserting negative coverage</td><td>Rests on a domain taxonomy that exists nowhere in the repo and that the idea never defines — unimplementable as stated, not merely unbuilt.</td></tr>
+<tr><td>C7</td><td>Archaeology mode mining decisions from git history</td><td>Genuine capability gap and feasible, but the risk of manufacturing “decisions” out of commit messages is unaddressed. Better developed as a brainstorm in its own right than adopted here.</td></tr>
+<tr><td>C9</td><td>Aviation Minimum Equipment List for declared gaps</td><td>Relabels a mechanism the repo already has almost verbatim in the fitness skill. The one real addition — a mandatory deadline rather than an open-ended trigger — needs no MEL framing and is folded into idea 6.</td></tr>
+<tr><td>C13</td><td>Pre-populate the options table</td><td>Merged into idea 3, where it is the move that makes the Evidence column land rather than a separate proposal.</td></tr>
+<tr><td>C14</td><td>Chartered devil's advocate agent</td><td>As a dedicated agent it fails the admission bar — impartiality is not context isolation, heavy parallel work, or worktree writes. Survives in reduced form as a prompted step inside idea 3.</td></tr>
+<tr><td>C17</td><td>Invert authorship — the reviewer emits ADRs</td><td>Reverses an explicit stated boundary (“You do not write the suggested ADRs … Read-only”) without engaging the self-review conflict it creates: a reviewer authoring the artifact it must independently judge.</td></tr>
+<tr><td>C20</td><td>Reviewer gains fixed Checks E–H</td><td>Same gap as idea 1, weaker statement: a fixed letter scheme inside one already-large agent file does not answer the user's “etc.”, and does not reuse the repo's own progressive-disclosure precedent.</td></tr>
+<tr><td>C24</td><td>“No new surfaces” as the design rule</td><td><b>Basis overstated.</b> The plugin is at 10 skills, so ADR-0002's “beyond ~15” trigger has not fired — this is proximity, not urgency. The underlying preference for extending existing seams is carried as a constraint on every survivor instead of standing as its own idea.</td></tr>
+<tr><td>C25</td><td>Scheduled covenant sweep of revisit triggers</td><td><b>Basis refuted.</b> No <code>schedule:</code> or <code>cron:</code> trigger exists in any of the five workflows; all CI is push- or PR-triggered. Reshaped into idea 7 as a PR-triggered check.</td></tr>
+<tr><td>C29</td><td>Auto-regenerate an AGENTS.md constraints section</td><td>“Regenerated with a staleness check” implies build tooling the repo lacks — <code>/context</code> writes once, on manual invocation. Viable only as a manual command, which is weaker than idea 4's just-in-time injection at the moment of the edit.</td></tr>
+</tbody>
+</table>
+<p>No axis ended with zero survivors; all five carry at least one.</p>
+</section>
+
+<footer class="composition-signal">
+Composed 2026-09-16 by ce-ideate from the session prompt “break out support for the ADR full lifecycle”.
+45 raw candidates from 6 frames, merged to 29, verified against the repo by an adversarial fresh-context pass,
+7 survivors.
+</footer>
+
+</div>
+</body>
+</html>
