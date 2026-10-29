@@ -1,6 +1,6 @@
 ---
 name: architecture-reviewer
-description: Reviews the current git diff against existing ADRs, fitness functions, and the technology radar. Surfaces (a) prior ADRs that govern changed code, (b) fitness functions impacted, (c) radar entries crossed (Hold-ring deps), (d) decisions made implicitly that should be ADR'd. Read-only structured architectural review. Dispatched by /software-architecture:review and auto-fired by Hook 5 (pre-ExitPlanMode).
+description: Reviews the current git diff against existing ADRs, fitness functions, and the technology radar. Surfaces (a) prior ADRs that govern changed code, (b) fitness functions impacted, (c) radar entries crossed (Hold-ring deps), (d) decisions made implicitly that should be ADR'd, (e) new capabilities added with no recorded placement fit verdict. Read-only structured architectural review. Dispatched by /software-architecture:review and auto-fired by Hook 5 (pre-ExitPlanMode).
 tools: Read, Glob, Grep, Bash, Skill
 model: opus
 ---
@@ -80,6 +80,21 @@ invoke `adr-historian` or do the search directly):
 - For each, name what *kind* of decision (granularity, coupling, data
   ownership, sagas, contracts) per the Hard Parts archetypes.
 
+**Check E — Placement fit recorded:**
+- List added files with `git diff --name-status --diff-filter=A <base>..HEAD`.
+- A file is a **new capability** when it matches one of:
+  - `.claude-plugin/plugin.json` or `docs/adr/<name>.md`, anywhere
+  - `skills/<name>/SKILL.md`, `commands/<name>.md`, `agents/<name>.md`
+    or `hooks/<name>`, directly under a directory that holds
+    `.claude-plugin/plugin.json` or is named `.claude`
+- For each new capability, search for a `Placement fit:` line, in this
+  order: the ADRs changed in the diff, then the commit messages in
+  `git log <base>..HEAD`, then the PR body via `gh pr view --json body`
+  (only when a PR exists and `gh` is available).
+- Report the verdict found for each capability, or "missing". A
+  recorded **Misfit** with no override is also a finding.
+- See `software-architecture:conceptual-integrity` for the verdict rules.
+
 ### Step 4 — Format the report
 
 ```markdown
@@ -115,6 +130,14 @@ invoke `adr-historian` or do the search directly):
 
 (If none: "No implicit decisions identified.")
 
+### Placement Fit
+| New capability | Verdict | Where recorded |
+|---|---|---|
+| `skills/<name>/SKILL.md` | Strong | commit <sha> |
+| `commands/<name>.md` | missing | — |
+
+(If none: "No new capabilities in this diff.")
+
 ### Recommended Actions
 - [ ] <action 1>
 - [ ] <action 2>
@@ -131,6 +154,9 @@ If any of the following are true, prepend to the report:
   reconsidering or filing a justification ADR.
 - 🟨 **NEEDS-DECISION** — An implicit decision was found that should be
   captured as an ADR before this change merges.
+- 🟨 **NEEDS-PLACEMENT** — A new capability has no `Placement fit:`
+  line, or carries a Misfit verdict with no recorded override. Recommend
+  running `/software-architecture:place` before this change merges.
 
 ## What you do NOT do
 
@@ -154,5 +180,6 @@ For very large diffs (> 1000 lines):
 - Skill: `software-architecture:architectural-fitness-functions`
 - Skill: `software-architecture:architecture-decision-records`
 - Skill: `software-architecture:technology-radar`
+- Skill: `software-architecture:conceptual-integrity`
 - Command: `/software-architecture:review` (your invocation point)
 - Hook 5: `hooks/exit-plan-mode.sh` (auto-fires you on pre-`ExitPlanMode`)
