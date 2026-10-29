@@ -503,7 +503,6 @@ test('reminder: an unreadable STRATEGY.md never fails the hook', (t) => {
   const s = sandbox(t);
   const root = makeRepo(s.base);
   chmodSync(join(root, 'STRATEGY.md'), 0o000);
-  t.after(() => chmodSync(join(root, 'STRATEGY.md'), 0o644));
 
   const result = run('anchors-reminder.sh', skill(root, 'compound-engineering:ce-work'), s.env);
   assert.equal(result.status, 0);
