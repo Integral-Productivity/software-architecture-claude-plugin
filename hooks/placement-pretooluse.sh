@@ -1,29 +1,9 @@
 #!/usr/bin/env bash
 #
-# Hook 6: PreToolUse (Write of a NEW capability file) — placement fit check
+# Hook 6: PreToolUse (Write of a new capability file) — placement fit check
 #
-# When a Write creates a file that adds a new capability to a host — a
-# skill, command, agent, hook, ADR, or plugin manifest — remind the agent
-# to run the placement fit check (software-architecture:conceptual-integrity)
-# and to record the verdict as a `Placement fit:` line (SAE-027).
-#
-# A capability file is one of:
-#   - `.../.claude-plugin/plugin.json` or `.../docs/adr/<name>.md`, anywhere
-#   - `<root>/skills/<name>/SKILL.md`, `<root>/commands/<name>.md`,
-#     `<root>/agents/<name>.md` or `<root>/hooks/<name>`, where <root>
-#     holds `.claude-plugin/plugin.json` or is itself named `.claude`
-#     (so an app's `src/hooks/useAuth.ts` stays silent)
-#
-# "New" means the path does not exist yet. A relative path resolves
-# against the payload `cwd`.
-#
-# This hook only adds context. It never denies the Write, and the reminder
-# arrives as the file is created, so it tells the agent to remove the file
-# on a Misfit verdict without an explicit override. The verdict rules live
-# in the skill, not here.
-#
-# Safety: the path is data. It reaches only `[[ ]]` tests and `jq --arg`,
-# never eval, a command substitution, or an external command.
+# Reminds the agent to run software-architecture:conceptual-integrity and
+# record a `Placement fit:` line (SAE-027). Adds context only; never denies.
 #
 # Opt-out: SA_PLUGIN_HOOKS not containing "placement".
 
@@ -35,7 +15,6 @@ if [[ -n "${SA_PLUGIN_HOOKS:-}" ]]; then
   fi
 fi
 
-# jq is this hook's only runtime dependency; without it, stay silent.
 if ! command -v jq >/dev/null 2>&1; then
   exit 0
 fi
@@ -53,7 +32,6 @@ if [[ "$FILE_PATH" != /* ]]; then
   FILE_PATH="${CWD:-$PWD}/$FILE_PATH"
 fi
 
-# An existing file is an edit to a capability, not a new one.
 if [[ -e "$FILE_PATH" ]]; then
   exit 0
 fi
