@@ -35,6 +35,9 @@ before working in an area they cover.
 - **`STRATEGY.md`** — what this plugin is for, its boundaries, key metrics
   and tracks. Read it before you change any file; resist a change it rules
   out.
+- **`QUALITY.md`** — the quality model (qualitymd format): the factors and
+  requirements a change must keep. Read it before you change any file; check
+  it with `qualitymd lint QUALITY.md`.
 - **`docs/solutions/`** — documented solutions to past problems (bugs, best
   practices, architecture patterns, workflow learnings), organized by category
   with YAML frontmatter (`module`, `tags`, `problem_type`, `component`).
