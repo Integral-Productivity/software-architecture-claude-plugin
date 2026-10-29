@@ -11,7 +11,7 @@ decision, the right context shows up.**
 
 ## What's in the plugin
 
-### 10 Skills
+### 11 Skills
 
 | Skill | Origin | Coverage |
 |---|---|---|
@@ -25,8 +25,9 @@ decision, the right context shows up.**
 | `evolutionary-architecture` | new | Continuous architectural verification |
 | `architecture-governance-levels` | new | 5-level governance + C4 model |
 | `tdd-as-architectural-discipline` | thin pointer | Inner-loop framing |
+| `conceptual-integrity` | new | Placement fit check for new capabilities |
 
-### 7 Commands
+### 8 Commands
 
 All commands use the `/software-architecture:` prefix.
 
@@ -37,6 +38,7 @@ All commands use the `/software-architecture:` prefix.
 - `/software-architecture:review` — architectural review of current diff
 - `/software-architecture:characterize` — workshop architectural characteristics
 - `/software-architecture:context` — multi-level governance interview
+- `/software-architecture:place` — placement fit check for a new capability
 
 ### 3 Agents
 
@@ -44,7 +46,7 @@ All commands use the `/software-architecture:` prefix.
 - `fitness-author` (Sonnet, worktree-isolated) — scaffolds new fitness functions
 - `architecture-reviewer` (Opus) — structured architectural review
 
-### 8 Hooks (opt-out via `SA_PLUGIN_HOOKS`)
+### 9 Hooks (opt-out via `SA_PLUGIN_HOOKS`)
 
 | Hook | Event | Purpose |
 |---|---|---|
@@ -56,8 +58,9 @@ All commands use the `/software-architecture:` prefix.
 | 6 | `PostToolUse` (Read, Bash) | Records reads of STRATEGY.md, QUALITY.md and ARCHITECTURE.md for this session |
 | 7 | `PreToolUse` (Write, Edit, NotebookEdit, Bash) | Warns before the first change when those governing documents are missing or unread |
 | 8 | `PreToolUse` (Skill), `UserPromptSubmit` | Adds STRATEGY.md Boundaries and Key metrics when ce-work, ce-debug, ce-code-review or lfg starts |
+| 9 | `PreToolUse` (Write of a new capability file) | Placement fit check reminder |
 
-Hooks 6 to 8 only warn; none of them blocks a call (ADR-0005).
+Hooks 6 to 9 only warn; none of them blocks a call (ADR-0005, SAE-027).
 
 ### 1 Compound Pack
 
@@ -141,9 +144,10 @@ of enabled hook short-names:
 | `planreview` | Pre-plan architectural review |
 | `anchors` | Governing-document read tracker and change gate |
 | `anchors-reminder` | Skill-start anchor reminder |
+| `placement` | Placement fit check reminder |
 
 Example: `export SA_PLUGIN_HOOKS=session,prompt,deps` (disables stop,
-planreview, anchors and anchors-reminder).
+planreview, anchors, anchors-reminder and placement).
 
 When the variable is unset, all hooks are enabled.
 

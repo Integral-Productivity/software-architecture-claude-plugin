@@ -40,6 +40,16 @@ A ringed map that places a technology in one of four adoption rings — Adopt, T
 
 A **Hold** ring is an active instruction to avoid a technology, not merely the absence of an opinion; a conflict between the external and internal radar is resolved in favor of the organizational signal.
 
+### Conceptual integrity
+The degree to which a system, repository, or plugin reflects one coherent set of design ideas, after Fred Brooks. Each host has a stated intent; work that does not serve that intent erodes it, even when the work itself is sound.
+
+Conceptual integrity is an architectural characteristic. Its common failure is convenience placement: new work lands in the repository that is open or whose name sounds close, rather than in the host whose intent it serves.
+
+### Placement fit check
+The check run before a new capability (skill, command, agent, hook, ADR, plugin, or top-level module) is added to a host. It reads the host's stated intent, searches for a prior placement decision, and returns exactly one verdict: **Strong** (continue), **Weak** (warn, name better homes, ask once), or **Misfit** (stop unless the user explicitly overrides).
+
+The verdict is recorded as a `Placement fit:` line in the commit that adds the capability. Name similarity and "the repository that is open" are never reasons on their own.
+
 ## Cross-plugin skill architecture
 
 ### Pointer-plus-delta skill
