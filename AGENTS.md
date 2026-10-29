@@ -17,10 +17,10 @@ product's own plugin (see CONTRIBUTING.md for the dividing line).
 ## Repo map
 
 ```
-skills/        # 10 architecture-practice skills (the product)
+skills/        # 11 architecture-practice skills (the product)
 commands/      # /software-architecture:<verb> commands
 agents/        # adr-historian, fitness-author, architecture-reviewer
-hooks/         # 5 hooks (opt-out via SA_PLUGIN_HOOKS)
+hooks/         # 6 hooks (opt-out via SA_PLUGIN_HOOKS)
 docs/adr/      # ADRs about THIS plugin's own structure (dogfooding)
 docs/solutions/                  # documented solutions to past problems (see below)
 # docs/brainstorms/, docs/plans/ — created on demand by ce-brainstorm / ce-plan

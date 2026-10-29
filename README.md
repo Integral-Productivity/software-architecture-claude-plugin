@@ -11,7 +11,7 @@ decision, the right context shows up.**
 
 ## What's in the plugin
 
-### 10 Skills
+### 11 Skills
 
 | Skill | Origin | Coverage |
 |---|---|---|
@@ -25,8 +25,9 @@ decision, the right context shows up.**
 | `evolutionary-architecture` | new | Continuous architectural verification |
 | `architecture-governance-levels` | new | 5-level governance + C4 model |
 | `tdd-as-architectural-discipline` | thin pointer | Inner-loop framing |
+| `conceptual-integrity` | new | Placement fit check for new capabilities |
 
-### 7 Commands
+### 8 Commands
 
 All commands use the `/software-architecture:` prefix.
 
@@ -37,6 +38,7 @@ All commands use the `/software-architecture:` prefix.
 - `/software-architecture:review` — architectural review of current diff
 - `/software-architecture:characterize` — workshop architectural characteristics
 - `/software-architecture:context` — multi-level governance interview
+- `/software-architecture:place` — placement fit check for a new capability
 
 ### 3 Agents
 
@@ -44,7 +46,7 @@ All commands use the `/software-architecture:` prefix.
 - `fitness-author` (Sonnet, worktree-isolated) — scaffolds new fitness functions
 - `architecture-reviewer` (Opus) — structured architectural review
 
-### 5 Hooks (opt-out via `SA_PLUGIN_HOOKS`)
+### 6 Hooks (opt-out via `SA_PLUGIN_HOOKS`)
 
 | Hook | Event | Purpose |
 |---|---|---|
@@ -53,6 +55,7 @@ All commands use the `/software-architecture:` prefix.
 | 3 | `PreToolUse` (dep files) | Radar ring enforcement |
 | 4 | `Stop` | End-of-session decision sweep reminder |
 | 5 | `PreToolUse` (ExitPlanMode) | Architectural review before plan submission |
+| 6 | `PreToolUse` (Write of a new capability file) | Placement fit check reminder |
 
 ## Installation
 
@@ -105,9 +108,10 @@ of enabled hook short-names:
 | `deps` | Dependency / radar enforcement |
 | `stop` | End-of-session reminder |
 | `planreview` | Pre-plan architectural review |
+| `placement` | Placement fit check reminder |
 
-Example: `export SA_PLUGIN_HOOKS=session,prompt,deps` (disables stop and
-planreview).
+Example: `export SA_PLUGIN_HOOKS=session,prompt,deps` (disables stop,
+planreview and placement).
 
 When the variable is unset, all hooks are enabled.
 
