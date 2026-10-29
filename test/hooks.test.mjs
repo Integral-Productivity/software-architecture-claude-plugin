@@ -12,7 +12,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, statSync, writeFileSync, constants } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync, constants } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, join, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -280,4 +280,162 @@ test('deps-pretooluse.sh filters whole container keys, not substrings of names',
   const context = ringContext(t, '{"dependencies":{"dependencies-tree":"^1.0.0"}}');
 
   assert.match(context, /\bdependencies-tree\b/);
+});
+
+// --- placement-pretooluse.sh -------------------------------------------------
+//
+// The placement hook reminds the agent to run the placement fit check when a
+// Write creates a NEW capability file (SAE-027). It only adds context; it
+// never denies. Paths are data: the hook passes them only to `[[ -e ]]` and
+// `jq --arg`, so a hostile path segment must never execute.
+
+const PLACEMENT_HOOK = HOOKS.find((h) => basename(h) === 'placement-pretooluse.sh');
+
+/** A PreToolUse payload for a Write (or other tool) to `filePath`. */
+function placementPayload(filePath, { tool = 'Write', cwd } = {}) {
+  const payload = { tool_name: tool, tool_input: { file_path: filePath, content: 'x' } };
+  if (cwd) payload.cwd = cwd;
+  return JSON.stringify(payload);
+}
+
+/** Run the placement hook and return its additionalContext ('' when silent). */
+function placementContext(filePath, opts = {}, env = { SA_PLUGIN_HOOKS: 'placement' }) {
+  assert.ok(PLACEMENT_HOOK, 'placement-pretooluse.sh should exist');
+  const result = runHook(PLACEMENT_HOOK, placementPayload(filePath, opts), env);
+  assert.equal(result.status, 0, `exited ${result.status}:\n${result.stderr}`);
+  const out = result.stdout.trim();
+  if (out.length === 0) return '';
+  const parsed = JSON.parse(out);
+  assert.equal(parsed.hookSpecificOutput?.hookEventName, 'PreToolUse');
+  assert.equal(parsed.hookSpecificOutput?.permissionDecision, undefined, 'the hook must never decide');
+  return parsed.hookSpecificOutput?.additionalContext ?? '';
+}
+
+/** A temporary plugin root: a directory holding `.claude-plugin/plugin.json`. */
+function withPluginRoot(fn) {
+  const dir = mkdtempSync(join(tmpdir(), 'sa-placement-'));
+  try {
+    mkdirSync(join(dir, '.claude-plugin'));
+    writeFileSync(join(dir, '.claude-plugin', 'plugin.json'), '{"name":"tmp"}\n');
+    return fn(dir);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+for (const relPath of ['skills/foo/SKILL.md', 'commands/foo.md', 'agents/foo.md', 'hooks/foo.sh']) {
+  test(`placement-pretooluse.sh reminds on a new ${relPath} in a plugin root`, (t) => {
+    if (!HAS_JQ) return t.skip('jq not installed');
+    withPluginRoot((dir) => {
+      const context = placementContext(join(dir, relPath));
+      assert.match(context, /software-architecture:conceptual-integrity/);
+      assert.match(context, /Placement fit:/);
+      assert.match(context, /remove/i);
+    });
+  });
+}
+
+test('placement-pretooluse.sh reminds on a new command under a .claude directory', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  const dir = mkdtempSync(join(tmpdir(), 'sa-placement-'));
+  try {
+    mkdirSync(join(dir, '.claude'));
+    assert.match(placementContext(join(dir, '.claude', 'commands', 'foo.md')), /conceptual-integrity/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+for (const relPath of ['docs/adr/0009-x.md', '.claude-plugin/plugin.json']) {
+  test(`placement-pretooluse.sh reminds on a new ${relPath} anywhere`, (t) => {
+    if (!HAS_JQ) return t.skip('jq not installed');
+    const dir = mkdtempSync(join(tmpdir(), 'sa-placement-'));
+    try {
+      assert.match(placementContext(join(dir, relPath)), /conceptual-integrity/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+}
+
+test('placement-pretooluse.sh stays silent for an existing capability file', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  withPluginRoot((dir) => {
+    mkdirSync(join(dir, 'commands'));
+    writeFileSync(join(dir, 'commands', 'foo.md'), '# foo\n');
+    assert.equal(placementContext(join(dir, 'commands', 'foo.md')), '');
+  });
+});
+
+for (const relPath of ['src/index.ts', 'commands/sub/foo.md']) {
+  test(`placement-pretooluse.sh stays silent for non-capability path ${relPath}`, (t) => {
+    if (!HAS_JQ) return t.skip('jq not installed');
+    withPluginRoot((dir) => {
+      assert.equal(placementContext(join(dir, relPath)), '');
+    });
+  });
+}
+
+for (const relPath of ['src/hooks/useAuth.ts', 'docs/commands/foo.md']) {
+  test(`placement-pretooluse.sh stays silent for ${relPath} outside a plugin root`, (t) => {
+    if (!HAS_JQ) return t.skip('jq not installed');
+    const dir = mkdtempSync(join(tmpdir(), 'sa-placement-'));
+    try {
+      assert.equal(placementContext(join(dir, relPath)), '');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+}
+
+test('placement-pretooluse.sh stays silent for an Edit', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  withPluginRoot((dir) => {
+    assert.equal(placementContext(join(dir, 'commands', 'foo.md'), { tool: 'Edit' }), '');
+  });
+});
+
+test('placement-pretooluse.sh honours the SA_PLUGIN_HOOKS opt-out', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  withPluginRoot((dir) => {
+    const target = join(dir, 'commands', 'foo.md');
+    assert.equal(placementContext(target, {}, { SA_PLUGIN_HOOKS: 'deps' }), '');
+    assert.match(placementContext(target, {}, { SA_PLUGIN_HOOKS: 'deps,placement' }), /conceptual-integrity/);
+  });
+});
+
+test('placement-pretooluse.sh resolves a relative path against the payload cwd', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  withPluginRoot((dir) => {
+    assert.match(placementContext('commands/foo.md', { cwd: dir }), /conceptual-integrity/);
+    mkdirSync(join(dir, 'commands'));
+    writeFileSync(join(dir, 'commands', 'foo.md'), '# foo\n');
+    assert.equal(placementContext('commands/foo.md', { cwd: dir }), '');
+  });
+});
+
+test('placement-pretooluse.sh never executes a hostile path segment', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  withPluginRoot((dir) => {
+    const target = join(dir, 'skills', '$(touch pwned-placement)', 'SKILL.md');
+    const result = runHook(PLACEMENT_HOOK, placementPayload(target, { cwd: dir }), {
+      SA_PLUGIN_HOOKS: 'placement',
+    });
+    assert.equal(result.status, 0, `exited ${result.status}:\n${result.stderr}`);
+    assert.match(result.stdout, /conceptual-integrity/);
+    assert.ok(!existsSync(join(dir, 'pwned-placement')), 'hostile segment ran in the plugin root');
+    assert.ok(!existsSync(join(ROOT, 'pwned-placement')), 'hostile segment ran in the repo root');
+  });
+});
+
+test('placement-pretooluse.sh exits 0 silently when jq is missing', () => {
+  assert.ok(PLACEMENT_HOOK, 'placement-pretooluse.sh should exist');
+  const result = spawnSync('/bin/bash', [PLACEMENT_HOOK], {
+    input: placementPayload('/tmp/x/docs/adr/0001-x.md'),
+    encoding: 'utf8',
+    env: { PATH: '/nonexistent', SA_PLUGIN_HOOKS: 'placement' },
+    cwd: ROOT,
+  });
+  assert.equal(result.status, 0, `exited ${result.status}:\n${result.stderr}`);
+  assert.equal(result.stdout.trim(), '');
 });
