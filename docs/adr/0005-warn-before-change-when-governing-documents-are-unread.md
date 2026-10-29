@@ -79,7 +79,7 @@ list, because it fires only when the repository already has an anchor.
 hooks there. `SA_PLUGIN_HOOKS` gains two keys: `anchors` (read tracker and
 gate) and `anchors-reminder`.
 
-**Evidence log.** The gate and the reminder append one tab-separated line per
+**Evidence log.** The three hooks append one tab-separated line per
 event (`warn`, `pass`, `read-after-warn`, `remind`) to
 `${XDG_STATE_HOME:-$HOME/.local/state}/software-architecture/anchors.log`, or
 to the path in `SA_ANCHORS_LOG`; `SA_ANCHORS_LOG=off` turns it off. `pass` and

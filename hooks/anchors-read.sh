@@ -25,6 +25,8 @@ anchors_enabled anchors || exit 0
 command -v jq >/dev/null 2>&1 || exit 0
 
 INPUT="$(cat)"
+# Cheap prefilter: this hook runs on every Read and Bash call.
+[[ "$INPUT" == *STRATEGY.md* || "$INPUT" == *QUALITY.md* || "$INPUT" == *ARCHITECTURE.md* ]] || exit 0
 SESSION="$(anchors_session_key "$(anchors_field "$INPUT" '.session_id')")"
 TOOL_NAME="$(anchors_field "$INPUT" '.tool_name')"
 CWD="$(anchors_field "$INPUT" '.cwd')"
@@ -33,14 +35,15 @@ CWD="$(anchors_field "$INPUT" '.cwd')"
 # mark_read PATH -- record PATH when it is an anchor at a repository root.
 mark_read() {
   local path="$1" base dir root gitdir markers
-  base="$(basename "$path")"
+  base="${path##*/}"
   case "$base" in
     STRATEGY.md|QUALITY.md|ARCHITECTURE.md) ;;
     *) return 0 ;;
   esac
   dir="$(anchors_canon_dir "$(dirname "$path")")" || return 0
   root="$(anchors_repo_root "$dir")" || return 0
-  [[ "$root" == "$dir" && -f "$root/$base" && ! -e "$root/.anchors-opt-out" ]] || return 0
+  [[ "$root" == "$dir" && -f "$root/$base" ]] || return 0
+  anchors_opted_out "$root" && return 0
   gitdir="$(anchors_common_git_dir "$root")" || return 0
   markers="$(anchors_marker_dir "$SESSION" "$gitdir")"
   [[ -e "$markers/read-$base" ]] && return 0
@@ -83,6 +86,7 @@ case "$TOOL_NAME" in
     COMMAND="${COMMAND//&&/;}"
     IFS=';' read -ra SEGMENTS <<< "${COMMAND//$'\n'/;}"
     for SEGMENT in ${SEGMENTS[@]+"${SEGMENTS[@]}"}; do
+      SEGMENT="$(anchors_strip_null_redirects "$SEGMENT")"
       [[ "$SEGMENT" =~ [\|\<\>\$\`\&] ]] && continue
       read_command "$SEGMENT"
     done

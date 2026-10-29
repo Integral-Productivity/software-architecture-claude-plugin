@@ -25,6 +25,8 @@ anchors_enabled anchors-reminder || exit 0
 command -v jq >/dev/null 2>&1 || exit 0
 
 INPUT="$(cat)"
+# Cheap prefilter: this hook runs on every prompt, and only these names matter.
+[[ "$INPUT" == *ce-work* || "$INPUT" == *ce-debug* || "$INPUT" == *ce-code-review* || "$INPUT" == *lfg* ]] || exit 0
 CWD="$(anchors_field "$INPUT" '.cwd')"
 [[ -n "$CWD" ]] || exit 0
 
@@ -43,7 +45,7 @@ else
 fi
 
 ROOT="$(anchors_repo_root "$CWD")" || exit 0
-[[ -e "$ROOT/.anchors-opt-out" ]] && exit 0
+anchors_opted_out "$ROOT" && exit 0
 [[ -f "$ROOT/STRATEGY.md" || -f "$ROOT/QUALITY.md" ]] || exit 0
 
 CAP=2000
@@ -63,9 +65,9 @@ section() {
 
 MESSAGE="📐 Repository anchors for ${SKILL}. This step does not load them itself, so keep this work inside them and say which ones apply."
 MISSING=()
-if [[ -f "$ROOT/STRATEGY.md" ]]; then
+if [[ -f "$ROOT/STRATEGY.md" && -r "$ROOT/STRATEGY.md" ]]; then
   for HEADING in "Boundaries" "Key metrics"; do
-    BODY="$(section "$ROOT/STRATEGY.md" "$HEADING")"
+    BODY="$(section "$ROOT/STRATEGY.md" "$HEADING" 2>/dev/null || true)"
     MESSAGE+=$'\n\n'"STRATEGY.md ${HEADING}:"$'\n'"${BODY:-(section not found)}"
   done
 else
@@ -84,7 +86,7 @@ REPO=""
 if GITDIR="$(anchors_common_git_dir "$ROOT")"; then
   REPO="$(anchors_repo_name "$GITDIR")"
 fi
-anchors_log remind "$REPO" "$SKILL" "$(IFS=,; printf '%s' "${MISSING[*]:-}")"
+anchors_log remind "$REPO" "$SKILL" "$(anchors_join , ${MISSING[@]+"${MISSING[@]}"})"
 
 jq -n --arg event "$EVENT" --arg ctx "$MESSAGE" '{
   "hookSpecificOutput": {

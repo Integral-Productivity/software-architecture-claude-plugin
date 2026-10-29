@@ -12,7 +12,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync,
+  chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -358,6 +358,16 @@ test('read: a plain shell read counts as a read', (t) => {
   assert.equal(context('anchors-gate.sh', edit(root, join(root, 'a.ts')), s.env), '');
 });
 
+test('read: a shell read with a /dev/null redirect counts as a read', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  const s = sandbox(t);
+  const root = makeRepo(s.base);
+  output('anchors-read.sh', bashRead(root, 'cat STRATEGY.md 2>/dev/null'), s.env);
+
+  const markers = readdirSync(s.markers, { recursive: true }).map(String);
+  assert.ok(markers.some((p) => p.endsWith('read-STRATEGY.md')), markers.join(', '));
+});
+
 test('read: a shell read after cd counts as a read', (t) => {
   if (!HAS_JQ) return t.skip('jq not installed');
   const s = sandbox(t);
@@ -482,7 +492,22 @@ test('reminder: silent without anchors, outside git, and when opted out', (t) =>
   for (const cwd of [bare, opted, join(s.base, 'loose')]) {
     assert.equal(context('anchors-reminder.sh', skill(cwd, 'compound-engineering:ce-work'), s.env), '', cwd);
   }
-  assert.equal(context('anchors-reminder.sh', skill(bare, 'compound-engineering:ce-work'), { ...s.env, SA_PLUGIN_HOOKS: 'anchors' }), '');
+  const both = makeRepo(s.base);
+  assert.equal(context('anchors-reminder.sh', skill(both, 'compound-engineering:ce-work'), { ...s.env, SA_PLUGIN_HOOKS: 'anchors' }), '');
+  assert.notEqual(context('anchors-reminder.sh', skill(both, 'compound-engineering:ce-work'), { ...s.env, SA_PLUGIN_HOOKS: 'anchors-reminder' }), '');
+});
+
+test('reminder: an unreadable STRATEGY.md never fails the hook', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  if (process.getuid?.() === 0) return t.skip('root reads every file');
+  const s = sandbox(t);
+  const root = makeRepo(s.base);
+  chmodSync(join(root, 'STRATEGY.md'), 0o000);
+  t.after(() => chmodSync(join(root, 'STRATEGY.md'), 0o644));
+
+  const result = run('anchors-reminder.sh', skill(root, 'compound-engineering:ce-work'), s.env);
+  assert.equal(result.status, 0);
+  assert.equal(result.stderr, '');
 });
 
 test('reminder: cuts a very long Boundaries section near the cap', (t) => {

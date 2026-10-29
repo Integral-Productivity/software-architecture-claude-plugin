@@ -100,7 +100,8 @@ anchors_owner_in_scope() {
 # anchors_marker_dir SESSION_KEY GITDIR -- this session's markers for a repo.
 anchors_marker_dir() {
   local repo_key
-  repo_key="$(printf '%s' "$2" | cksum | awk '{ print $1 }')"
+  repo_key="$(printf '%s' "$2" | cksum)"
+  repo_key="${repo_key%% *}"
   printf '%s/sa-anchors/%s/%s' "${TMPDIR:-/tmp}" "$1" "$repo_key"
 }
 
@@ -111,12 +112,34 @@ anchors_log() {
   [[ "$path" == "off" ]] && return 0
   local fields=() field
   for field in "$1" "${2:--}" "${3:--}" "${4:--}" "${5:--}"; do
-    fields+=("$(printf '%s' "$field" | tr -d '\t\r\n')")
+    fields+=("${field//[$'\t\r\n']/}")
   done
   {
     mkdir -p "$(dirname "$path")" &&
       printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${fields[@]}" >> "$path"
   } 2>/dev/null || true
+}
+
+# anchors_strip_null_redirects COMMAND -- COMMAND without redirects that write
+# nothing: to /dev/null or to another descriptor.
+anchors_strip_null_redirects() {
+  if [[ "$1" == *">"* ]]; then
+    printf '%s' "$1" | sed -E 's/[0-9&]?>>?[[:space:]]*\/dev\/null//g; s/[0-9]?>&[0-9-]+//g'
+  else
+    printf '%s' "$1"
+  fi
+}
+
+# anchors_opted_out ROOT -- true when the repository opts out of all three hooks.
+anchors_opted_out() {
+  [[ -e "$1/.anchors-opt-out" ]]
+}
+
+# anchors_join SEPARATOR ITEM... -- the items joined by SEPARATOR.
+anchors_join() {
+  local IFS="$1"
+  shift
+  printf '%s' "$*"
 }
 
 # anchors_creator FILE -- the skill that creates a missing anchor.

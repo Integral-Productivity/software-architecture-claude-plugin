@@ -121,7 +121,7 @@ reminder (hook 8) needs no owner list: it fires only in a repository that
 already has STRATEGY.md or QUALITY.md.
 
 - **Opt a repository out:** add an empty `.anchors-opt-out` file at its root.
-- **Evidence log:** hooks 7 and 8 append one tab-separated line per event
+- **Evidence log:** hooks 6 to 8 append one tab-separated line per event
   (`warn`, `pass`, `read-after-warn`, `remind`) to
   `${XDG_STATE_HOME:-~/.local/state}/software-architecture/anchors.log`. Set
   `SA_ANCHORS_LOG` to another path (for example a persisted path in a cloud

@@ -35,8 +35,7 @@ CWD="$(anchors_field "$INPUT" '.cwd')"
 # detectable pattern. Conservative: a miss costs a warning, never a block.
 is_change() {
   local command words='(^|[[:space:];&|(])'
-  # Drop redirects that write nothing: to /dev/null or to another descriptor.
-  command="$(printf '%s' "$1" | sed -E 's/[0-9&]?>>?[[:space:]]*\/dev\/null//g; s/[0-9]?>&[0-9-]+//g')"
+  command="$(anchors_strip_null_redirects "$1")"
   [[ "$command" == *">"* ]] && return 0
   [[ "$command" =~ ${words}git[[:space:]]+(commit|apply)([[:space:]]|$) ]] && return 0
   [[ "$command" =~ ${words}sed[[:space:]]+(-[A-Za-z]*i|--in-place) ]] && return 0
@@ -57,7 +56,7 @@ esac
 [[ -n "$TARGET" ]] || exit 0
 
 ROOT="$(anchors_repo_root "$(dirname "$(anchors_abspath "$TARGET" "$CWD")")")" || exit 0
-[[ -e "$ROOT/.anchors-opt-out" ]] && exit 0
+anchors_opted_out "$ROOT" && exit 0
 GITDIR="$(anchors_common_git_dir "$ROOT")" || exit 0
 REPO="$(anchors_repo_name "$GITDIR")"
 anchors_owner_in_scope "${REPO%%/*}" || exit 0
@@ -77,19 +76,17 @@ for ANCHOR in STRATEGY.md QUALITY.md ARCHITECTURE.md; do
   fi
 done
 
-join_by() { local IFS="$1"; shift; printf '%s' "$*"; }
-
 if [[ ${#MISSING[@]} -eq 0 && ${#UNREAD[@]} -eq 0 ]]; then
   anchors_log pass "$REPO" "$TOOL_NAME"
   exit 0
 fi
 
 : > "$MARKERS/warned"
-anchors_log warn "$REPO" "$TOOL_NAME" "$(join_by , ${MISSING[@]+"${MISSING[@]}"})" "$(join_by , ${UNREAD[@]+"${UNREAD[@]}"})"
+anchors_log warn "$REPO" "$TOOL_NAME" "$(anchors_join , ${MISSING[@]+"${MISSING[@]}"})" "$(anchors_join , ${UNREAD[@]+"${UNREAD[@]}"})"
 
 MESSAGE="📐 Governing documents for ${REPO} are not yet consulted in this session. Before the first change:"
 if [[ ${#UNREAD[@]} -gt 0 ]]; then
-  MESSAGE+=$'\n'"- Unread: $(join_by , ${UNREAD[@]+"${UNREAD[@]}"} | sed 's/,/, /g')"
+  MESSAGE+=$'\n'"- Unread: $(anchors_join , ${UNREAD[@]+"${UNREAD[@]}"} | sed 's/,/, /g')"
   MESSAGE+=$'\n'"  Read each one at ${ROOT} and keep this change inside the strategy Boundaries and the quality requirements."
 fi
 for ANCHOR in ${MISSING[@]+"${MISSING[@]}"}; do
