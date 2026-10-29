@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Hook 6: PreToolUse (Write of a new capability file) — placement fit check
+# Hook 9: PreToolUse (Write of a new capability file) — placement fit check
 #
 # Reminds the agent to run software-architecture:conceptual-integrity and
 # record a `Placement fit:` line (SAE-027). Adds context only; never denies.

@@ -46,7 +46,7 @@ All commands use the `/software-architecture:` prefix.
 - `fitness-author` (Sonnet, worktree-isolated) — scaffolds new fitness functions
 - `architecture-reviewer` (Opus) — structured architectural review
 
-### 6 Hooks (opt-out via `SA_PLUGIN_HOOKS`)
+### 9 Hooks (opt-out via `SA_PLUGIN_HOOKS`)
 
 | Hook | Event | Purpose |
 |---|---|---|
@@ -55,7 +55,18 @@ All commands use the `/software-architecture:` prefix.
 | 3 | `PreToolUse` (dep files) | Radar ring enforcement |
 | 4 | `Stop` | End-of-session decision sweep reminder |
 | 5 | `PreToolUse` (ExitPlanMode) | Architectural review before plan submission |
-| 6 | `PreToolUse` (Write of a new capability file) | Placement fit check reminder |
+| 6 | `PostToolUse` (Read, Bash) | Records reads of STRATEGY.md, QUALITY.md and ARCHITECTURE.md for this session |
+| 7 | `PreToolUse` (Write, Edit, NotebookEdit, Bash) | Warns before the first change when those governing documents are missing or unread |
+| 8 | `PreToolUse` (Skill), `UserPromptSubmit` | Adds STRATEGY.md Boundaries and Key metrics when ce-work, ce-debug, ce-code-review or lfg starts |
+| 9 | `PreToolUse` (Write of a new capability file) | Placement fit check reminder |
+
+Hooks 6 to 9 only warn; none of them blocks a call (ADR-0005, SAE-027).
+
+### 1 Compound Pack
+
+- `packs/repo-anchors/` — rules that make compound-engineering planning and
+  review cite the repository's STRATEGY.md Boundaries and Key metrics and its
+  QUALITY.md requirements. See its [README](packs/repo-anchors/README.md).
 
 ## Installation
 
@@ -96,6 +107,29 @@ enforcement) read this path at runtime and degrade gracefully when it's
 unset. Record the same location in `ARCHITECTURE.md` so the skills and
 agents can find it too.
 
+### Configuring governing-document anchors (optional)
+
+Hooks 6 to 8 check that an agent has read a repository's governing documents
+(STRATEGY.md, QUALITY.md and, when present, ARCHITECTURE.md) before it changes
+the repository. The change gate (hook 7) acts only in repositories whose
+`origin` remote owner you list:
+
+```
+export SA_ANCHORS_OWNERS="your-org,your-user"   # comma-separated, case-insensitive
+export SA_ANCHORS_OWNERS="*"                     # every repository
+```
+
+When `SA_ANCHORS_OWNERS` is unset, the gate is silent. The skill-start
+reminder (hook 8) needs no owner list: it fires only in a repository that
+already has STRATEGY.md or QUALITY.md.
+
+- **Opt a repository out:** add an empty `.anchors-opt-out` file at its root.
+- **Evidence log:** hooks 6 to 8 append one tab-separated line per event
+  (`warn`, `pass`, `read-after-warn`, `remind`) to
+  `${XDG_STATE_HOME:-~/.local/state}/software-architecture/anchors.log`. Set
+  `SA_ANCHORS_LOG` to another path (for example a persisted path in a cloud
+  container), or to `off`. No hook reads the log.
+
 ## Disabling individual hooks
 
 Set the environment variable `SA_PLUGIN_HOOKS` to a comma-separated list
@@ -108,10 +142,12 @@ of enabled hook short-names:
 | `deps` | Dependency / radar enforcement |
 | `stop` | End-of-session reminder |
 | `planreview` | Pre-plan architectural review |
+| `anchors` | Governing-document read tracker and change gate |
+| `anchors-reminder` | Skill-start anchor reminder |
 | `placement` | Placement fit check reminder |
 
 Example: `export SA_PLUGIN_HOOKS=session,prompt,deps` (disables stop,
-planreview and placement).
+planreview, anchors, anchors-reminder and placement).
 
 When the variable is unset, all hooks are enabled.
 

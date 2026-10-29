@@ -47,6 +47,9 @@ Hooks are the most invasive surface. Add a hook only when:
 - The signal-to-noise ratio is excellent (fires only when relevant)
 - Users can opt out per-hook via `SA_PLUGIN_HOOKS`
 
+Shared shell helpers go in `hooks/lib/` and are sourced by path; only
+top-level `hooks/*.sh` files are hooks.
+
 ## Authoring conventions
 
 ### Skill frontmatter
@@ -94,6 +97,12 @@ install step beyond Node 20+. The tests live in `test/`:
   under `bash -n`, and on a representative stdin payload exits 0 emitting
   only valid JSON (the JSON-emission checks need `jq`, the hooks' own
   runtime dependency, and skip when it is absent).
+- **`anchors.test.mjs`** — the governing-document hooks (read tracker,
+  gate, reminder) against throwaway repositories; each test names the
+  scenario it covers in `docs/scenarios/governing-document-anchors.feature`.
+- **`packs.test.mjs`** — every rule under `packs/<id>/` has the
+  compound-engineering `title` and `applies_when` frontmatter, and no pack or
+  hook file names the maintaining organization.
 - **`manifest.test.mjs`** — `.claude-plugin/plugin.json` is valid JSON with
   non-empty `name`/`description`/`version`, and every hook command in
   `.claude-plugin/hooks.json` resolves to an executable script.
