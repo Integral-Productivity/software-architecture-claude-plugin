@@ -43,7 +43,7 @@ internal building blocks:
 | Container | Role |
 |---|---|
 | `.claude-plugin/plugin.json` | Manifest |
-| `.claude-plugin/hooks.json` | Hook event registration |
+| `hooks/hooks.json` | Hook event registration |
 | `skills/` | 10 skill files (passive knowledge) |
 | `commands/` | 7 command entry points |
 | `agents/` | 3 subagent definitions |
