@@ -27,8 +27,17 @@ test('.claude-plugin/plugin.json is valid JSON with required fields', () => {
   }
 });
 
-test('.claude-plugin/hooks.json is valid JSON and every command points at an executable script', () => {
-  const manifest = readJson('.claude-plugin/hooks.json');
+test('hooks are registered where Claude Code loads them', () => {
+  // Claude Code reads hooks/hooks.json unless plugin.json names a "hooks" path. A manifest at
+  // .claude-plugin/hooks.json is never loaded, so no hook fires (all hooks were silent until 0.1.1).
+  const plugin = readJson('.claude-plugin/plugin.json');
+  assert.equal(plugin.hooks, undefined, 'plugin.json must not redirect hooks; keep them in hooks/hooks.json');
+  assert.ok(existsSync(join(ROOT, 'hooks/hooks.json')), 'hooks/hooks.json must exist');
+  assert.ok(!existsSync(join(ROOT, '.claude-plugin/hooks.json')), '.claude-plugin/hooks.json is never loaded');
+});
+
+test('hooks/hooks.json is valid JSON and every command points at an executable script', () => {
+  const manifest = readJson('hooks/hooks.json');
   assert.ok(manifest.hooks && typeof manifest.hooks === 'object', "hooks.json must have a 'hooks' object");
 
   // Collect every command string across all event types / matchers.

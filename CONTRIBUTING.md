@@ -105,7 +105,7 @@ install step beyond Node 20+. The tests live in `test/`:
   hook file names the maintaining organization.
 - **`manifest.test.mjs`** — `.claude-plugin/plugin.json` is valid JSON with
   non-empty `name`/`description`/`version`, and every hook command in
-  `.claude-plugin/hooks.json` resolves to an executable script.
+  `hooks/hooks.json` resolves to an executable script.
 
 The shared frontmatter reader and file-discovery helpers live in
 `test/lib/`.
