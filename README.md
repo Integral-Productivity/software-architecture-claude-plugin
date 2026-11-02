@@ -64,7 +64,7 @@ Hooks 6 to 9 only warn; none of them blocks a call (ADR-0005, SAE-027).
 
 ### 1 Compound Pack
 
-- `packs/repo-anchors/` — rules that make compound-engineering planning and
+- `packs/repo-anchors/` — rules that make [compound-engineering](https://github.com/EveryInc/compound-engineering-plugin) planning and
   review cite the repository's STRATEGY.md Boundaries and Key metrics and its
   QUALITY.md requirements. See its [README](packs/repo-anchors/README.md).
 
@@ -167,10 +167,10 @@ The plugin is opinionated about three things:
 
 ## Related plugins (delegated to)
 
-- `superpowers:test-driven-development` — inner-loop TDD (we wrap, not duplicate)
-- `superpowers:receiving-code-review`, `requesting-code-review` — review *mechanics*
-- `lean-management` — day-to-day operational discipline
-- `holacracy` — governance circles
+- [superpowers](https://github.com/obra/superpowers) `test-driven-development` — inner-loop TDD (we wrap, not duplicate)
+- [superpowers](https://github.com/obra/superpowers) `receiving-code-review`, `requesting-code-review` — review *mechanics*
+- [lean-management](https://github.com/Integral-Productivity/lean-management-claude-plugin) — day-to-day operational discipline
+- [self-org](https://github.com/Integral-Productivity/self-org-claude-plugin) — Holacracy governance circles
 
 ## Bring your own standards repos
 
