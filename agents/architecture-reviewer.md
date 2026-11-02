@@ -34,7 +34,10 @@ git diff main..HEAD --stat
 git diff main..HEAD
 ```
 
-If invoked by Hook 5, the diff is already in the worktree; use it.
+If invoked by Hook 5 (before ExitPlanMode), the change is still in the
+worktree and not committed. Diff the working tree against the base
+instead (`git diff main --stat`, `git diff main`), and list untracked
+files with `git ls-files --others --exclude-standard`.
 
 ### Step 2 — Identify changed surfaces
 
@@ -81,7 +84,11 @@ invoke `adr-historian` or do the search directly):
   ownership, sagas, contracts) per the Hard Parts archetypes.
 
 **Check E — Placement fit recorded:**
-- List added files with `git diff --name-status --diff-filter=A <base>..HEAD`.
+- List added files from the working tree, so uncommitted work counts too.
+  Combine and de-duplicate the output of:
+  - `git diff --name-status --diff-filter=A <base>` (committed, staged
+    and unstaged additions)
+  - `git ls-files --others --exclude-standard` (untracked files)
 - A file is a **new capability** when it matches one of:
   - `.claude-plugin/plugin.json` or `docs/adr/<name>.md`, anywhere
   - `skills/<name>/SKILL.md`, `commands/<name>.md`, `agents/<name>.md`
@@ -91,7 +98,9 @@ invoke `adr-historian` or do the search directly):
   order: the ADRs changed in the diff, then the commit messages in
   `git log <base>..HEAD`, then the PR body via `gh pr view --json body`
   (only when a PR exists and `gh` is available).
-- Report the verdict found for each capability, or "missing". A
+- Report the verdict found for each capability. When none is found,
+  report "not yet recorded (uncommitted)" if the file is not committed
+  yet (no commit message can hold its verdict), else "missing". A
   recorded **Misfit** with no override is also a finding.
 - See `software-architecture:conceptual-integrity` for the verdict rules.
 
@@ -135,6 +144,7 @@ invoke `adr-historian` or do the search directly):
 |---|---|---|
 | `skills/<name>/SKILL.md` | Strong | commit <sha> |
 | `commands/<name>.md` | missing | — |
+| `agents/<name>.md` | not yet recorded (uncommitted) | — |
 
 (If none: "No new capabilities in this diff.")
 
