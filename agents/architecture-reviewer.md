@@ -34,10 +34,12 @@ git diff main..HEAD --stat
 git diff main..HEAD
 ```
 
-If invoked by Hook 5 (before ExitPlanMode), the change is still in the
-worktree and not committed. Diff the working tree against the base
-instead (`git diff main --stat`, `git diff main`), and list untracked
-files with `git ls-files --others --exclude-standard`.
+Then check for uncommitted work with `git status --porcelain`. Hook 5
+runs before ExitPlanMode, so the change is often still in the worktree.
+When `git status --porcelain` prints anything, review the working tree
+against the base instead (`git diff main --stat`, `git diff main`), and
+read the untracked files that `git ls-files --others --exclude-standard`
+lists. Do this whether or not the caller says it is Hook 5.
 
 ### Step 2 — Identify changed surfaces
 
@@ -86,21 +88,25 @@ invoke `adr-historian` or do the search directly):
 **Check E — Placement fit recorded:**
 - List added files from the working tree, so uncommitted work counts too.
   Combine and de-duplicate the output of:
-  - `git diff --name-status --diff-filter=A <base>` (committed, staged
-    and unstaged additions)
-  - `git ls-files --others --exclude-standard` (untracked files)
+  - `git diff --name-only --no-renames --diff-filter=A <base>`
+    (committed, staged and unstaged additions, renamed files included)
+  - `git ls-files --others --exclude-standard --full-name` (untracked
+    files)
+  Both print one repository-relative path per line.
 - A file is a **new capability** when it matches one of:
   - `.claude-plugin/plugin.json` or `docs/adr/<name>.md`, anywhere
   - `skills/<name>/SKILL.md`, `commands/<name>.md`, `agents/<name>.md`
     or `hooks/<name>`, directly under a directory that holds
     `.claude-plugin/plugin.json` or is named `.claude`
 - For each new capability, search for a `Placement fit:` line, in this
-  order: the ADRs changed in the diff, then the commit messages in
+  order: the ADRs changed in the diff or listed as untracked, then the
+  commit messages in
   `git log <base>..HEAD`, then the PR body via `gh pr view --json body`
   (only when a PR exists and `gh` is available).
 - Report the verdict found for each capability. When none is found,
-  report "not yet recorded (uncommitted)" if the file is not committed
-  yet (no commit message can hold its verdict), else "missing". A
+  report "not yet recorded (uncommitted)" if `git status --porcelain --
+  <path>` prints a line for the file (no commit message can hold its
+  verdict yet), else "missing". Both statuses raise NEEDS-PLACEMENT. A
   recorded **Misfit** with no override is also a finding.
 - See `software-architecture:conceptual-integrity` for the verdict rules.
 
@@ -165,7 +171,7 @@ If any of the following are true, prepend to the report:
 - 🟨 **NEEDS-DECISION** — An implicit decision was found that should be
   captured as an ADR before this change merges.
 - 🟨 **NEEDS-PLACEMENT** — A new capability has no `Placement fit:`
-  line, or carries a Misfit verdict with no recorded override. Recommend
+  line ("missing" or "not yet recorded (uncommitted)"), or carries a Misfit verdict with no recorded override. Recommend
   running `/software-architecture:place` before this change merges.
 
 ## What you do NOT do

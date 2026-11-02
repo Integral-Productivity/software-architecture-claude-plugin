@@ -29,8 +29,15 @@ function listingCommands(section) {
     .filter((cmd) => /--diff-filter=A|--others/.test(cmd));
 }
 
+// Isolate from the caller's git: a git hook can export GIT_DIR, and user
+// config can require signed commits.
+const GIT_ENV = Object.fromEntries(
+  Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_')),
+);
+Object.assign(GIT_ENV, { GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1' });
+
 function git(cwd, ...args) {
-  const r = spawnSync('git', args, { cwd, encoding: 'utf8' });
+  const r = spawnSync('git', args, { cwd, encoding: 'utf8', env: GIT_ENV });
   assert.equal(r.status, 0, `git ${args.join(' ')}: ${r.stderr}`);
   return r.stdout;
 }
@@ -42,13 +49,17 @@ test('architecture-reviewer Check E lists uncommitted and untracked new capabili
   const repo = mkdtempSync(join(tmpdir(), 'sa-check-e-'));
   try {
     git(repo, 'init', '-q');
-    git(repo, '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'base');
+    writeFileSync(join(repo, 'notes.md'), '# draft command\n');
+    git(repo, 'add', 'notes.md');
+    git(repo, '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '-m', 'base');
     const base = git(repo, 'rev-parse', 'HEAD').trim();
     mkdirSync(join(repo, '.claude-plugin'));
     writeFileSync(join(repo, '.claude-plugin', 'plugin.json'), '{}\n');
     git(repo, 'add', '.claude-plugin/plugin.json'); // staged, not committed
     mkdirSync(join(repo, 'skills', 'new-skill'), { recursive: true });
     writeFileSync(join(repo, 'skills', 'new-skill', 'SKILL.md'), '---\nname: new-skill\n---\n'); // untracked
+    mkdirSync(join(repo, 'commands'));
+    git(repo, 'mv', 'notes.md', 'commands/moved.md'); // rename into a capability path
 
     const listed = commands
       .map((cmd) => {
@@ -59,6 +70,7 @@ test('architecture-reviewer Check E lists uncommitted and untracked new capabili
 
     assert.match(listed, /\.claude-plugin\/plugin\.json/, 'staged new file not listed');
     assert.match(listed, /skills\/new-skill\/SKILL\.md/, 'untracked new file not listed');
+    assert.match(listed, /commands\/moved\.md/, 'file renamed into a capability path not listed');
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }
