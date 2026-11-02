@@ -24,7 +24,7 @@ specific repos.
 ## C4 — System Context
 
 The plugin lives inside the user's Claude Code installation, alongside
-other plugins (superpowers, lean-management, holacracy, etc.). It
+other plugins (superpowers, lean-management, self-org, etc.). It
 interacts with:
 
 - **The user** — invokes commands, receives system reminders from hooks
