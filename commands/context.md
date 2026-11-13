@@ -48,6 +48,11 @@ depends on the routing table this command produces.
      process, governance meeting, or none)?
    Write one row per source with its Order. The `adr-pretooluse.sh` hook and
    the `adr-historian` agent read this table.
+   Then build the `## Radar Sources` table (format in
+   `references/technology-adoption.md`): which radars exist (an org radar
+   file or URL, a radar service reached through an MCP server, Thoughtworks),
+   in what order, and whether each is `binding` or `advisory`. Technology-
+   adoption ADRs are drafted from these radars.
 
 6. **C4 stubs (optional)** — ask if the user wants Context, Container,
    Component stubs. Provide minimal templates with placeholder text.

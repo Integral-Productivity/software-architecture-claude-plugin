@@ -68,3 +68,23 @@ Feature: ADRs record architectural decisions and stay healthy across their lifec
     When the user runs /software-architecture:adr-audit
     Then the report lists each finding with evidence and a proposed action
     And no ADR file is changed, deleted or renumbered
+
+  # Technology adoption from radars (ADR-0007)
+
+  Scenario: A technology-adoption ADR is drafted from the configured radars
+    Given ARCHITECTURE.md has a Radar Sources table with the org radar at order 1 and Thoughtworks at order 2
+    When the user runs /software-architecture:adopt for a technology and two alternatives
+    Then every option is looked up on every radar
+    And the ADR has a Radar evidence section and a radar row in its options table
+    And a radar that could not be reached is listed as "not checked"
+
+  Scenario: The org ring shapes the ADR
+    Given the chosen technology is on Hold in the org radar
+    When the ADR is drafted
+    Then it records "Deviates from:" naming the Hold entry
+    And it offers an upstream proposal through /software-architecture:radar
+
+  Scenario: A new non-Adopt dependency suggests an adoption ADR
+    Given SA_RADAR_PATH places a dependency on Trial
+    When the agent adds it to package.json
+    Then the context suggests /software-architecture:adopt with trial scope and exit criteria

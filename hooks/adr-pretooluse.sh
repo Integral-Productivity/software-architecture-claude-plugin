@@ -123,6 +123,36 @@ if [[ -n "$ROOT" && -f "$ROOT/ARCHITECTURE.md" ]]; then
   ' "$ROOT/ARCHITECTURE.md")"
 fi
 
+# Radar Sources: rows of the table under `## Radar Sources`.
+# Columns: Order | Radar | Location | Kind | Mode
+RADARS=""
+if [[ -n "$ROOT" && -f "$ROOT/ARCHITECTURE.md" ]]; then
+  RADARS="$(awk -F'|' '
+    /^##[[:space:]]+Radar Sources[[:space:]]*$/ { inside = 1; next }
+    inside && /^##[[:space:]]/ { inside = 0 }
+    inside && /^[[:space:]]*\|/ {
+      rows++
+      if (rows <= 2) next
+      for (i = 2; i <= 6; i++) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i); gsub(/`/, "", $i) }
+      if ($3 == "" && $4 == "") next
+      line = "  " $2 ". " $3 ": " $4
+      if ($5 != "") line = line " (" $5
+      if ($6 != "") line = line ", " $6
+      if ($5 != "") line = line ")"
+      print substr(line, 1, 240)
+      if (++printed >= 6) exit
+    }
+  ' "$ROOT/ARCHITECTURE.md")"
+fi
+if [[ -n "$RADARS" ]]; then
+  RADAR_NOTE="If this ADR adopts a technology, draft it from these radars, in order (\`/software-architecture:adopt\`, references/technology-adoption.md): look up every option, add a Radar evidence section, and let the org ring shape the ADR:
+${RADARS}"
+elif [[ -n "${SA_RADAR_PATH:-}" ]]; then
+  RADAR_NOTE="If this ADR adopts a technology, draft it from the radar at SA_RADAR_PATH and Thoughtworks (\`/software-architecture:adopt\`, references/technology-adoption.md)."
+else
+  RADAR_NOTE="If this ADR adopts a technology, draft it with \`/software-architecture:adopt\`: no radar is configured, so check Thoughtworks and offer \`/software-architecture:context\` to add a Radar Sources table."
+fi
+
 if [[ -n "$SOURCES" ]]; then
   REMEMBER="Remember (top-down): before you decide, read the binding sources below in this order, slowest and widest level first, and cite each ADR that constrains this one on a \`Constrained by:\` line:
 ${SOURCES}
@@ -136,7 +166,8 @@ if [[ "$MODE" == "new" ]]; then
 1. Scope test: an ADR records a decision that changes the repository's structure, the solution's structure, a quality-attribute trade-off, a technology selection, or a contract between parts or systems, AND is hard to reverse, surprising without context, and a real trade-off. A worklog, plan, runbook, how-to, lesson, observed fact, status update or one-PR implementation choice is not an ADR: put it in its own home (see the skill's references/scope.md) and do not create this file.
 2. Route it: confirm the governance level (\`software-architecture:architecture-governance-levels\`) and state a \`Placement fit: <Strong|Weak|Misfit> — <reason>\` line in the commit message.
 3. ${REMEMBER}
-4. Start it as Proposed unless the user has already accepted the decision."
+4. ${RADAR_NOTE}
+5. Start it as Proposed unless the user has already accepted the decision."
 else
   MESSAGE="📝 **ADR edit**: \`${TARGET}\` is an Architecture Decision Record. Apply the lifecycle rules of \`software-architecture:architecture-decision-records\` (references/lifecycle.md):
 - Do not rewrite the Decision of an Accepted ADR. Add a dated amendment, or write a superseding ADR.

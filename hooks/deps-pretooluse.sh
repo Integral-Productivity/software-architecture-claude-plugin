@@ -162,16 +162,16 @@ UNKNOWNS="${UNKNOWNS%, }"
 MESSAGE=""
 
 if [[ -n "$HOLDS" ]]; then
-  MESSAGE+="🟥 **Hold-ring dependencies detected**: ${HOLDS}. The Technology Radar places these on **Hold**. Confirm with the user before proceeding, and consider filing a justification ADR if added intentionally. "
+  MESSAGE+="🟥 **Hold-ring dependencies detected**: ${HOLDS}. The Technology Radar places these on **Hold**. Confirm with the user before proceeding. If it is added on purpose, draft a technology-adoption ADR with \`/software-architecture:adopt\` that records the radar evidence and a \`Deviates from:\` line for the Hold placement. "
 fi
 
 if [[ -n "$TRIALS" ]]; then
-  MESSAGE+="🟨 **Trial-ring dependencies**: ${TRIALS}. The Technology Radar places these on Trial. Note the trial conditions in any ADR. "
+  MESSAGE+="🟨 **Trial-ring dependencies**: ${TRIALS}. The Technology Radar places these on Trial. If this adopts it for the repository, draft a technology-adoption ADR with \`/software-architecture:adopt\` that states the trial scope and exit criteria. "
 fi
 
 if [[ -n "$UNKNOWNS" && -z "$HOLDS" && -z "$TRIALS" ]]; then
   # Only mention unknowns if no Hold/Trial; otherwise it's noise
-  MESSAGE+="📊 New dependencies (${UNKNOWNS}) not on the Radar. Consider \`/software-architecture:radar\` to assess. "
+  MESSAGE+="📊 New dependencies (${UNKNOWNS}) not on the Radar. If one is a technology the code will be shaped around, draft a technology-adoption ADR with \`/software-architecture:adopt\`, and propose a ring with \`/software-architecture:radar\`. "
 fi
 
 if [[ -z "$MESSAGE" ]]; then
