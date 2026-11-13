@@ -118,3 +118,9 @@ findings; the Decision above is unchanged.
 
 The triggers listed under Consequences above still apply. Trigger 2 has
 fired; see the amendment.
+
+## Proposed successor
+
+[ADR-0010](0010-pin-each-catalog-to-a-release-tag-with-a-lead-catalog.md)
+(Proposed 2026-11-13, #93) supersedes this ADR on acceptance. This record
+stays Accepted until then.

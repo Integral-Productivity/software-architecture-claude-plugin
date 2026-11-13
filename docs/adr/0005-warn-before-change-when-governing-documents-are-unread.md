@@ -4,7 +4,7 @@ Date: 2026-10-29
 
 ## Status
 
-Accepted 2026-10-29. Amended 2026-11-13.
+Accepted 2026-10-29. Amended 2026-11-13 (twice).
 
 Provenance: [Integral-Productivity/software-architecture-claude-plugin#91](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/91) (retrospective issue)
 
@@ -126,3 +126,11 @@ the repository's `owner/name`.
   new ADR.
 - **Trigger due.** The warn period started 2026-10-29 (#67), so the two-week
   trigger came due on 2026-11-12. The deny-mode decision is open.
+
+## Amendment 2026-11-13: warn period extended
+
+The two-week warn period ended on 2026-11-12 without log evidence: cloud
+sessions discard `anchors.log` unless `SA_ANCHORS_LOG` points at a persisted
+path. The owner chose on 2026-11-13 to extend the warn period to 2026-12-11
+and collect evidence first. The gate stays warn-only until then. The
+deny-mode decision, and the evidence it needs, are tracked in #94.
