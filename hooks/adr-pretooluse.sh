@@ -168,7 +168,8 @@ if [[ "$MODE" == "new" ]]; then
 3. ${REMEMBER}
 4. ${RADAR_NOTE}
 5. Keep feature detail (commands, fields, user steps, acceptance criteria) out of the Decision: it belongs in a PRD, specification or issue, linked from the ADR.
-6. Start it as Proposed, and run the \`software-architecture:adr-reviewer\` agent on the draft before you commit it."
+6. Name the tracked work item on a \`Provenance:\` line (GitHub issue, Productboard entity or GlassFrog project ID); without one the ADR stays Proposed. The lifecycle fitness function (ADR-0009) fails CI on an Accepted ADR whose gaps outlast the curing period.
+7. Start it as Proposed, and run the \`software-architecture:adr-reviewer\` agent on the draft before you commit it."
 else
   MESSAGE="📝 **ADR edit**: \`${TARGET}\` is an Architecture Decision Record. Apply the lifecycle rules of \`software-architecture:architecture-decision-records\` (references/lifecycle.md):
 - Do not rewrite the Decision of an Accepted ADR. Add a dated amendment, or write a superseding ADR.

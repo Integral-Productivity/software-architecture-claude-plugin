@@ -12,7 +12,9 @@ Follow `software-architecture:architecture-decision-records`
 ## Process
 
 1. **Name the technology and the options.** Ask for the alternatives that
-   were considered if the user names only one.
+   were considered if the user names only one. Name the tracked work item
+   for the `Provenance:` line (GitHub issue, Productboard entity or
+   GlassFrog project ID); offer to create one if none exists.
 2. **Scope test.** Apply both gates. If the choice is reversible in one PR,
    say so, record it in the PR body, and stop.
 3. **Find the radars.** Read `## Radar Sources` in `ARCHITECTURE.md`; else

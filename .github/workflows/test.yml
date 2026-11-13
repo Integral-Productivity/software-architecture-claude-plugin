@@ -33,3 +33,10 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      # ADR lifecycle fitness function (ADR-0009): Proposed findings are info,
+      # newly Accepted findings warn, and Accepted findings fail once the
+      # 30-day curing period has passed. --since is the day this repository
+      # adopted the rule, so existing ADRs get the same curing period.
+      - name: ADR lifecycle fitness
+        run: node fitness/adr-lifecycle.mjs --since 2026-11-13

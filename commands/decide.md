@@ -14,6 +14,9 @@ trade-off analysis → ADR.
    `software-architecture:architecture-decision-records` (architectural
    scope, and the three triggers). If either fails, stop: say which gate
    failed and name the record's home. Do not write an ADR.
+   Then name the tracked work item for the `Provenance:` line (GitHub
+   issue, Productboard entity or GlassFrog project ID). If none exists,
+   offer to create one first; the ADR stays Proposed without it.
 
 1. **Frame the decision** — restate the user's intent as a forced
    single-sentence choice. If it's not a forced choice, ask the user to

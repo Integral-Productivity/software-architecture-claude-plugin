@@ -94,7 +94,12 @@ Every ADR must answer six questions:
    `Accepted`, `Amended`, `Superseded by ADR-NNN`, `Deprecated`, `Rejected`
    or `Reclassified`. Add `Constrained by:` (higher-level ADRs this one
    follows) and, when it applies, `Deviates from:` (a binding higher-level
-   ADR this one departs from). See "Lifecycle" below.
+   ADR this one departs from). Add `Provenance:` naming the tracked work
+   item that asked for the decision, by ID: a GitHub issue (`owner/repo#N`
+   or its URL), a Productboard product, component, feature or sub-feature
+   (ID or URL), or a GlassFrog project ID. A chat thread or meeting can be
+   cited next to the ID, never instead of it. No work item, no acceptance:
+   create the item first. See "Lifecycle" below.
 
 4. **Options considered** — What alternatives were evaluated? Evaluate each
    on the same set of dimensions so options are comparable.
@@ -114,6 +119,8 @@ Before marking an ADR `Accepted`, verify:
 - [ ] No feature smell: the Decision names a structural choice, not a list
       of features; feature detail is linked, not copied
 - [ ] Reviewed by the `software-architecture:adr-reviewer` agent
+- [ ] A `Provenance:` line names a GitHub issue, Productboard entity or
+      GlassFrog project by ID
 - [ ] Higher-level ADRs were read in Context Sources order and cited on a
       `Constrained by:` line; any departure is on a `Deviates from:` line
 - [ ] Context stands alone — no prior knowledge required
@@ -144,6 +151,11 @@ Any state ──reclassify (failed the scope test)──▶ Reclassified
   what it supersedes; the old ADR names its successor.
 - **On a change, review the revisit triggers** and any fitness function that
   cites the ADR.
+- **The lifecycle sets how hard the rules bite** (ADR-0009). The fitness
+  function `fitness/adr-lifecycle.mjs` reports a Proposed ADR's gaps as info,
+  a newly Accepted ADR's gaps as warnings, and fails CI once an Accepted ADR
+  has been past its curing period (default 30 days) with gaps left. Fix the
+  gaps while the ADR is Proposed.
 - **Reclassify, do not delete.** An ADR that fails the scope test keeps its
   number and file, gets `Reclassified`, and points to the record's new home.
 

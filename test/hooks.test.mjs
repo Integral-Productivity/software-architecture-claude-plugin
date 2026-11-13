@@ -517,6 +517,8 @@ test('adr-pretooluse.sh gives the scope test and Placement fit line for a new AD
     assert.match(context, /Placement fit:/);
     assert.match(context, /feature detail/, 'features belong in a spec or issue, not the ADR');
     assert.match(context, /software-architecture:adr-reviewer/);
+    assert.match(context, /Provenance:/);
+    assert.match(context, /GlassFrog project/);
     assert.match(context, /software-architecture:context/, 'no Context Sources: offer the setup command');
   });
 });
