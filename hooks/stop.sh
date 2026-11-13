@@ -30,7 +30,7 @@ if [[ -z "$CHANGED_LINES" && "$NEW_FILES" -eq 0 ]]; then
   exit 0
 fi
 
-MESSAGE="🏁 Before closing this session — if architectural decisions were made (new services, dependency changes, structural refactors, contract changes), capture them via \`/software-architecture:decide\` so the reasoning isn't lost. Use \`/software-architecture:review\` to check the diff against existing ADRs and fitness functions."
+MESSAGE="🏁 Before closing this session — if architectural decisions were made (new services, dependency changes, structural refactors, contract changes) that pass the ADR scope test, capture them via \`/software-architecture:decide\` so the reasoning isn't lost. Do not turn a worklog, plan or lesson into an ADR. Use \`/software-architecture:review\` to check the diff against existing ADRs and fitness functions."
 
 jq -n --arg msg "$MESSAGE" '{
   "hookSpecificOutput": {

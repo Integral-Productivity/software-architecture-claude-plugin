@@ -27,7 +27,7 @@ decision, the right context shows up.**
 | `tdd-as-architectural-discipline` | thin pointer | Inner-loop framing |
 | `conceptual-integrity` | new | Placement fit check for new capabilities |
 
-### 8 Commands
+### 9 Commands
 
 All commands use the `/software-architecture:` prefix.
 
@@ -39,6 +39,7 @@ All commands use the `/software-architecture:` prefix.
 - `/software-architecture:characterize` — workshop architectural characteristics
 - `/software-architecture:context` — multi-level governance interview
 - `/software-architecture:place` — placement fit check for a new capability
+- `/software-architecture:adr-audit` — review a repository's ADRs as one portfolio (scope, lifecycle, higher-level ADRs)
 
 ### 3 Agents
 
@@ -46,7 +47,7 @@ All commands use the `/software-architecture:` prefix.
 - `fitness-author` (Sonnet, worktree-isolated) — scaffolds new fitness functions
 - `architecture-reviewer` (Opus) — structured architectural review
 
-### 9 Hooks (opt-out via `SA_PLUGIN_HOOKS`)
+### 10 Hooks (opt-out via `SA_PLUGIN_HOOKS`)
 
 | Hook | Event | Purpose |
 |---|---|---|
@@ -59,8 +60,9 @@ All commands use the `/software-architecture:` prefix.
 | 7 | `PreToolUse` (Write, Edit, NotebookEdit, Bash) | Warns before the first change when those governing documents are missing or unread |
 | 8 | `PreToolUse` (Skill), `UserPromptSubmit` | Adds STRATEGY.md Boundaries and Key metrics when ce-work, ce-debug, ce-code-review or lfg starts |
 | 9 | `PreToolUse` (Write of a new capability file) | Placement fit check reminder |
+| 10 | `PreToolUse` (Write or Edit of an ADR file, `adr new`) | ADR scope test, lifecycle rules, and higher-level ADRs in Context Sources order |
 
-Hooks 6 to 9 only warn; none of them blocks a call (ADR-0005, SAE-027).
+Hooks 6 to 10 only warn; none of them blocks a call (ADR-0005, ADR-0006, SAE-027).
 
 ### 1 Compound Pack
 
@@ -91,7 +93,11 @@ routing for your repo:
 ```
 
 This produces `ARCHITECTURE.md` at the repo root, which the
-`adr-historian` agent reads to find prior decisions.
+`adr-historian` agent reads to find prior decisions. Its optional
+`## Context Sources` table lists the repositories whose ADRs this one must
+read, in load order (slowest, widest level first), each `binding` or
+`advisory`, with a revolt channel for upstream proposals. Hook 10 and the
+`adr-historian` agent read it (ADR-0006).
 
 ### Configuring a custom Technology Radar (optional)
 
@@ -145,9 +151,10 @@ of enabled hook short-names:
 | `anchors` | Governing-document read tracker and change gate |
 | `anchors-reminder` | Skill-start anchor reminder |
 | `placement` | Placement fit check reminder |
+| `adr` | ADR file trigger (scope, lifecycle, Context Sources) |
 
 Example: `export SA_PLUGIN_HOOKS=session,prompt,deps` (disables stop,
-planreview, anchors, anchors-reminder and placement).
+planreview, anchors, anchors-reminder, placement and adr).
 
 When the variable is unset, all hooks are enabled.
 

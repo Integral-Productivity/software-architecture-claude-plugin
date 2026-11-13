@@ -1,19 +1,22 @@
 ---
 name: architecture-decision-records
 description: >
-  Create Architecture Decision Records for any project — technology choices,
-  design trade-offs, infrastructure decisions, API design, integration
-  patterns, or any one-way-door decision. Use whenever an architectural
-  decision is being made, even without saying "ADR." Trigger on "should we
-  use X or Y," "how should we architect," "what's the right approach for,"
-  "document why we chose X," "moving from X to Y," or any choice that is
-  hard to reverse. Invoke `software-architecture:technology-radar` alongside
-  this skill when the decision involves selecting a technology, and
-  `software-architecture:architectural-trade-offs` when applying a Hard
-  Parts archetype.
+  Decide whether a decision deserves an Architecture Decision Record, write
+  it, and carry each ADR and a repository's whole ADR set through their
+  lifecycle. Use when an architectural decision is made (repository
+  structure, solution structure, quality-attribute trade-off, technology
+  selection, a contract between parts or systems), when writing or editing a
+  file under docs/adr/ or running `adr new`, when superseding, amending,
+  deprecating or reviewing ADRs, or when checking a decision against
+  enterprise or platform ADRs. Also use to decide that a record is NOT an
+  ADR (worklog, plan, runbook, lesson, observed fact, status update) and
+  route it to its own home. Pairs with `software-architecture:technology-radar`
+  for technology choices and `software-architecture:architectural-trade-offs`
+  for Hard Parts archetypes.
 status: draft
-version: 1.0.0
+version: 2.0.0
 ---
+
 
 # Architecture Decision Records
 
@@ -26,34 +29,47 @@ This skill teaches the practice. For the *where* of ADR routing (Enterprise /
 Platform / System / Service / Code), see
 [`software-architecture:architecture-governance-levels`](../architecture-governance-levels/SKILL.md).
 
-## When to Write an ADR
+## When to Write an ADR (scope test)
 
-Write an ADR for **one-way doors** — decisions that are costly or disruptive
-to reverse. Common examples:
+An ADR records an **architectural** decision. Noise in the ADR set costs
+every future reader and the `software-architecture:adr-historian` agent, so
+apply both gates before you write one. Full detail and worked examples:
+[references/scope.md](references/scope.md).
 
-- API protocol or surface design (REST, GraphQL, webhooks, event schemas)
-- Data modeling decisions (domain model shape, ID strategy, schema evolution)
-- Infrastructure and deployment choices (hosting, databases, edge vs. origin)
-- Integration patterns (how services connect, adapter strategy)
-- Authentication and authorization architecture
-- Technology selection (language, framework, key library)
-- Service boundary decisions (granularity, decomposition strategy)
-- Distributed-data ownership (which service owns which write path)
+**Gate 1: architectural scope.** The decision changes at least one of:
 
-**Skip the ADR** for two-way doors — decisions you can easily reverse without
-significant rework. If you're not sure, lean toward writing it. A short ADR
-costs 10 minutes; undoing a bad decision costs days.
+| Scope | Examples |
+|---|---|
+| Repository architecture | Module and package layout, monorepo vs polyrepo, what the repo owns and does not own, build and release surface, extension points |
+| Solution architecture | Architectural style, service or component boundaries, data ownership and write paths, integration pattern, deployment topology |
+| Quality-attribute trade-off | Which architectural characteristic wins (for example availability over consistency), and the fitness function that holds it |
+| Technology selection | Language, framework, platform, datastore, key library |
+| Contract | API, event or schema shape and its evolution policy, between parts or with other systems |
 
-The three triggers from the `/grill-with-docs` skill are useful here. Only
-offer to create an ADR when all three are true:
+**Gate 2: the three triggers** (after Matt Pocock's `grill-with-docs`). All
+three are true:
 
-1. **Hard to reverse** — the cost of changing your mind later is meaningful.
-2. **Surprising without context** — a future reader will wonder "why did
-   they do it this way?"
-3. **The result of a real trade-off** — there were genuine alternatives and
-   you picked one for specific reasons.
+1. **Hard to reverse** — changing your mind later costs meaningful rework.
+2. **Surprising without context** — a future reader will ask "why this way?"
+3. **A real trade-off** — there were genuine alternatives, and you chose one
+   for stated reasons.
 
-If any of the three is missing, skip the ADR.
+If either gate fails, **do not write an ADR**. Put the record in its own home:
+
+| It is a… | Put it in |
+|---|---|
+| Worklog, session log, "what we did" | The PR body, the issue, or a session ledger |
+| Plan or task breakdown | `docs/plans/` or the tracker |
+| Runbook or how-to | `docs/runbooks/` or `docs/` |
+| Lesson, gotcha, client or tool quirk | `docs/solutions/` (a solution note) |
+| Observed fact or inventory (where DNS is hosted, which plan we are on) | A fact register or the system's own config; amend the ADR that assumed otherwise only if a decision changes |
+| Status or progress update | The tracker or the PR |
+| Convention with no real alternative (naming, formatting) | `CONTRIBUTING.md`, a linter rule |
+| One-PR implementation choice | The PR body |
+
+When a gate fails, say which gate and name the home in one line. Do not
+"lean toward writing it": a missing ADR is found by review
+(`/software-architecture:review`); a noise ADR stays forever.
 
 ## ADR Anatomy
 
@@ -66,8 +82,11 @@ Every ADR must answer six questions:
 2. **Decision** — What was decided? State it in one paragraph. If you can't
    state it in one paragraph, the decision isn't crisp enough yet.
 
-3. **Status** — `Proposed` / `Accepted` / `Superseded by ADR-NNN` /
-   `Deprecated`.
+3. **Status** — one lifecycle state with its date: `Proposed`,
+   `Accepted`, `Amended`, `Superseded by ADR-NNN`, `Deprecated`, `Rejected`
+   or `Reclassified`. Add `Constrained by:` (higher-level ADRs this one
+   follows) and, when it applies, `Deviates from:` (a binding higher-level
+   ADR this one departs from). See "Lifecycle" below.
 
 4. **Options considered** — What alternatives were evaluated? Evaluate each
    on the same set of dimensions so options are comparable.
@@ -83,6 +102,9 @@ Every ADR must answer six questions:
 
 Before marking an ADR `Accepted`, verify:
 
+- [ ] It passes both scope gates (architectural scope and the three triggers)
+- [ ] Higher-level ADRs were read in Context Sources order and cited on a
+      `Constrained by:` line; any departure is on a `Deviates from:` line
 - [ ] Context stands alone — no prior knowledge required
 - [ ] Decision is one paragraph
 - [ ] Every option is evaluated on identical dimensions
@@ -91,6 +113,56 @@ Before marking an ADR `Accepted`, verify:
 - [ ] Revisit triggers are specific and measurable
 - [ ] ADR is numbered and committed on an `adr/<slug>` branch
 - [ ] ADR lives in the correct repo per the governance-levels routing table
+
+## Lifecycle of one ADR
+
+Detail and the transition table: [references/lifecycle.md](references/lifecycle.md).
+
+```
+Proposed ──accept──▶ Accepted ──amend──▶ Amended
+    │                   │  │
+  reject              supersede  deprecate
+    ▼                   ▼         ▼
+ Rejected          Superseded  Deprecated
+Any state ──reclassify (failed the scope test)──▶ Reclassified
+```
+
+- **Never rewrite an Accepted Decision.** Add a dated amendment that does not
+  change the decision's direction, or write a superseding ADR that does.
+- **Every transition is two-way linked and dated.** A superseding ADR names
+  what it supersedes; the old ADR names its successor.
+- **On a change, review the revisit triggers** and any fitness function that
+  cites the ADR.
+- **Reclassify, do not delete.** An ADR that fails the scope test keeps its
+  number and file, gets `Reclassified`, and points to the record's new home.
+
+## The ADR portfolio (one repository)
+
+ADRs are read as a set, so keep the set healthy. Run
+`/software-architecture:adr-audit` at a release, a quarter, or before a large
+change. It reports reclassify candidates, stale `Proposed` records, broken
+supersession links, `Accepted` records with no revisit triggers, conflicts
+with binding higher-level ADRs, and revolt candidates. It proposes; you
+decide. Detail: [references/portfolio.md](references/portfolio.md).
+
+## Higher-level ADRs: remember and revolt
+
+Decisions nest. A repository's ADRs live inside its platform's and its
+enterprise's. `ARCHITECTURE.md` can list these homes in a
+`## Context Sources` table, in load order from the slowest, widest level to
+the fastest, narrowest (set it with `/software-architecture:context`).
+
+- **Remember (top-down):** before you decide, read the `binding` sources in
+  order. Cite each ADR that constrains this decision on `Constrained by:`.
+  Treat `advisory` sources as input, not as constraints.
+- **Revolt (bottom-up):** when a local decision departs from, or proves a
+  better way than, a binding higher-level ADR, record `Deviates from:` with
+  the reason, and offer the user an upstream proposal through that source's
+  revolt channel. Do not let the local ADR silently override the higher one.
+
+These are the two cross-scale links of panarchy (Gunderson and Holling,
+*Panarchy*, 2002). Detail and the table format:
+[references/panarchical-context.md](references/panarchical-context.md).
 
 ## adr-tools Commands
 

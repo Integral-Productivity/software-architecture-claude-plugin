@@ -52,6 +52,13 @@ if echo "$PROMPT_LOWER" | grep -qE "(breaking change|api version|schema migratio
   MATCH=true
 fi
 
+# ADR lifecycle triggers: writing, superseding, deprecating or reviewing ADRs
+ADR_MATCH=false
+if echo "$PROMPT_LOWER" | grep -qE "((^|[^a-z])adrs?([^a-z]|$)|decision record|supersed|deprecate (the|this|that) (adr|decision)|record (this|the|that) decision|document (why|the decision))" ; then
+  MATCH=true
+  ADR_MATCH=true
+fi
+
 if [[ "$MATCH" == "false" ]]; then
   exit 0
 fi
@@ -60,7 +67,13 @@ fi
 REMINDER="💡 The user's prompt suggests an architectural decision. Before proceeding, consider:
 - Invoking the \`adr-historian\` agent to check for prior decisions.
 - Using \`/software-architecture:decide\` to walk through Hard Parts trade-offs and capture as an ADR.
-- Using \`/software-architecture:trade-off\` to reason through the decision without committing to an ADR yet."
+- Using \`/software-architecture:trade-off\` to reason through the decision without committing to an ADR yet.
+- Writing an ADR only if it passes the scope test in \`software-architecture:architecture-decision-records\` (architectural scope, hard to reverse, surprising, a real trade-off); worklogs, plans, lessons and facts go elsewhere."
+
+if [[ "$ADR_MATCH" == "true" ]]; then
+  REMINDER+="
+- For ADR changes (supersede, amend, deprecate, review), follow the lifecycle in that skill, or run \`/software-architecture:adr-audit\` for the whole set."
+fi
 
 jq -n --arg msg "$REMINDER" '{
   "hookSpecificOutput": {
