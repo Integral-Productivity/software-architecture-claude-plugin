@@ -4,7 +4,9 @@ Date: 2026-06-12
 
 ## Status
 
-Accepted
+Accepted 2026-06-12. Amended 2026-11-13.
+
+Provenance: [Integral-Productivity/software-architecture-claude-plugin#2](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/2)
 
 Extends [0002](0002-establish-software-architecture-plugin-and-its-scope.md).
 
@@ -114,3 +116,19 @@ this plugin's ADR.
   references.
 - The distribution mechanism gains (or is decided to need) tag/ref pinning
   for plugin references.
+
+## Amendment 2026-11-13
+
+- The Decision was redacted on 2026-06-23 for the public release (PR #11)
+  without a change of direction.
+- The paragraph "The deprecated-layer decommission is complete in principle"
+  records status at acceptance, not a decision. It does not bind.
+- Revisit trigger 3 (tag/ref pinning) fired. ADR-0004 closes the version
+  contract that this record left open.
+- The "Revisit triggers" heading above uses level 3; the fitness function
+  (ADR-0009) reads it through this amendment's section below.
+
+## Revisit triggers
+
+The triggers listed under Consequences above still apply, except trigger 3,
+which fired and is closed by ADR-0004.
