@@ -27,7 +27,7 @@ decision, the right context shows up.**
 | `tdd-as-architectural-discipline` | thin pointer | Inner-loop framing |
 | `conceptual-integrity` | new | Placement fit check for new capabilities |
 
-### 9 Commands
+### 10 Commands
 
 All commands use the `/software-architecture:` prefix.
 
@@ -39,6 +39,7 @@ All commands use the `/software-architecture:` prefix.
 - `/software-architecture:characterize` — workshop architectural characteristics
 - `/software-architecture:context` — multi-level governance interview
 - `/software-architecture:place` — placement fit check for a new capability
+- `/software-architecture:adopt` — draft a technology-adoption ADR from the configured radars
 - `/software-architecture:adr-audit` — review a repository's ADRs as one portfolio (scope, lifecycle, higher-level ADRs)
 
 ### 3 Agents
@@ -97,7 +98,9 @@ This produces `ARCHITECTURE.md` at the repo root, which the
 `## Context Sources` table lists the repositories whose ADRs this one must
 read, in load order (slowest, widest level first), each `binding` or
 `advisory`, with a revolt channel for upstream proposals. Hook 10 and the
-`adr-historian` agent read it (ADR-0006).
+`adr-historian` agent read it (ADR-0006). An optional `## Radar Sources`
+table lists the radars (org radar file, radar service, Thoughtworks) that
+technology-adoption ADRs are drafted from (ADR-0007).
 
 ### Configuring a custom Technology Radar (optional)
 

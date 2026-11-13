@@ -7,8 +7,9 @@ description: >
   structure, solution structure, quality-attribute trade-off, technology
   selection, a contract between parts or systems), when writing or editing a
   file under docs/adr/ or running `adr new`, when superseding, amending,
-  deprecating or reviewing ADRs, or when checking a decision against
-  enterprise or platform ADRs. Also use to decide that a record is NOT an
+  deprecating or reviewing ADRs, when checking a decision against
+  enterprise or platform ADRs, or when adopting a technology (drafted from
+  the configured technology radars). Also use to decide that a record is NOT an
   ADR (worklog, plan, runbook, lesson, observed fact, status update) and
   route it to its own home. Pairs with `software-architecture:technology-radar`
   for technology choices and `software-architecture:architectural-trade-offs`
@@ -204,16 +205,20 @@ cross-ADR comparability.
 
 ## Technology Decisions
 
-When the ADR involves selecting a technology, invoke
-`software-architecture:technology-radar` before writing the options section.
-The radar check provides:
+A technology-adoption ADR is drafted from the radars, not from memory. Use
+`/software-architecture:adopt`, or follow
+[references/technology-adoption.md](references/technology-adoption.md):
 
-- Thoughtworks ring placement (Adopt / Trial / Assess / Hold)
-- Your org's custom radar placement (if configured)
-- Recent movement signal (reassessed up or down)
-
-Include the radar findings in the options table. An option at "Hold" on the
-Thoughtworks radar needs a stronger justification than one at "Adopt."
+1. Read the `## Radar Sources` table in `ARCHITECTURE.md` (org radar file,
+   radar service, Thoughtworks), in order.
+2. Look up every option on every radar with
+   `software-architecture:technology-radar`.
+3. Let the org ring shape the ADR: Trial needs scope and exit criteria; Hold
+   needs a `Deviates from:` line and an upstream proposal; not on the radar
+   is treated as Assess.
+4. Add a "Radar evidence" section, a radar row in the options table, and
+   radar revisit triggers.
+5. Offer `/software-architecture:radar` to move the ring to match the ADR.
 
 ## Hard Parts Decisions
 

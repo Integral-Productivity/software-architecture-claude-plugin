@@ -36,9 +36,10 @@ trade-off analysis → ADR.
    `software-architecture:architecture-governance-levels`, identify
    which repo's `docs/adr/` is the correct home for the ADR.
 
-5. **Run technology check (if applicable)** — if the decision involves
-   selecting a technology, invoke `software-architecture:technology-radar`
-   to surface ring placements and add them to the options table.
+5. **Run technology check (if applicable)** — if the decision adopts a
+   technology, follow `/software-architecture:adopt`: look up every option
+   on every radar in `ARCHITECTURE.md` Radar Sources, and let the org ring
+   shape the ADR.
 
 6. **Write the ADR** — use `adr new <Title>` if `.adr-dir` exists; else
    offer to initialize. Follow the six-section anatomy from

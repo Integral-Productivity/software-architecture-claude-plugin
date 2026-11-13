@@ -606,3 +606,31 @@ test('prompt-submit.sh adds the ADR scope and lifecycle reminder for ADR languag
   assert.match(run('write an ADR for this'), /scope test/);
   assert.equal(run('read the address list and fix the typo'), '');
 });
+
+test('adr-pretooluse.sh lists Radar Sources in order for technology-adoption ADRs', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  const arch = `${CONTEXT_SOURCES}
+## Radar Sources
+
+| Order | Radar | Location | Kind | Mode |
+|---|---|---|---|---|
+| 1 | Org radar | docs/tech-context/radar.md | file | binding |
+| 2 | Thoughtworks | https://www.thoughtworks.com/radar | thoughtworks | advisory |
+`;
+  withRepo((dir) => {
+    const context = adrContext(write(join(dir, 'docs/adr/0008-adopt-x.md')));
+    assert.match(context, /software-architecture:adopt/);
+    const org = context.indexOf('Org radar');
+    const tw = context.indexOf('Thoughtworks: https');
+    assert.ok(org > 0 && tw > org, `expected org radar before Thoughtworks:\n${context}`);
+    assert.match(context, /file, binding/);
+  }, { architecture: arch });
+});
+
+test('adr-pretooluse.sh offers radar setup when no radar is configured', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  withRepo((dir) => {
+    const context = adrContext(write(join(dir, 'docs/adr/0008-x.md')), { SA_PLUGIN_HOOKS: 'adr', SA_RADAR_PATH: '' });
+    assert.match(context, /no radar is configured/);
+  });
+});

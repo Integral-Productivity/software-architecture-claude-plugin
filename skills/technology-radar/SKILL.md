@@ -92,7 +92,9 @@ shared standards repo, e.g. `<your-org>/architecture-standards/docs/tech-context
 
 ### Accessing the Radar
 
-1. Read the radar location from `ARCHITECTURE.md`.
+1. Read the radar locations from the `## Radar Sources` table in
+   `ARCHITECTURE.md`, in order. A row of Kind `mcp` is a radar service:
+   use its lookup tool instead of reading a file.
 2. Read the radar file from the configured local path, or `WebFetch` it from
    the configured URL if no local clone is present.
 
@@ -193,10 +195,11 @@ ring placements in the options comparison table.
 
 ### With `software-architecture:architecture-decision-records`
 
-When an ADR involves technology selection, run the radar check before
-writing the options section. Include radar findings as a dimension in the
-options table. An option at "Hold" on both radars requires explicit
-justification.
+When an ADR involves technology selection, run the radar check on every
+option, on every radar in the `## Radar Sources` table of `ARCHITECTURE.md`,
+before writing the options section. `/software-architecture:adopt` drafts the
+whole ADR from the results; see that skill's
+`references/technology-adoption.md` for how each ring shapes the ADR.
 
 ### With `software-architecture:architectural-fitness-functions`
 
