@@ -50,7 +50,9 @@ Categorize changed files into:
   `requirements.txt`, `go.mod`, `Cargo.toml`, etc.
 - **Fitness functions**: files under `fitness/`, `scripts/fitness/`,
   `tests/fitness/`.
-- **ADRs**: files under `docs/adr/`.
+- **ADRs**: files under `docs/adr/`. Dispatch
+  `software-architecture:adr-reviewer` on them and include its findings;
+  this agent reviews code against ADRs, that one reviews the ADR documents.
 - **Infrastructure**: `.github/workflows/`, `Dockerfile`,
   `terraform/`, etc.
 

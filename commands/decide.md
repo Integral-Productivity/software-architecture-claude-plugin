@@ -45,7 +45,10 @@ trade-off analysis → ADR.
    offer to initialize. Follow the six-section anatomy from
    `software-architecture:architecture-decision-records`.
 
-7. **Confirm before commit** — show the ADR draft to the user; only
+7. **Review the draft** — dispatch `software-architecture:adr-reviewer` on
+   it and fix its findings, especially the feature smell.
+
+8. **Confirm before commit** — show the ADR draft to the user; only
    commit after explicit confirmation (per global CLAUDE.md "Executing
    actions with care").
 

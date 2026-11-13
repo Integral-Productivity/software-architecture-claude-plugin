@@ -42,11 +42,12 @@ All commands use the `/software-architecture:` prefix.
 - `/software-architecture:adopt` — draft a technology-adoption ADR from the configured radars
 - `/software-architecture:adr-audit` — review a repository's ADRs as one portfolio (scope, lifecycle, higher-level ADRs)
 
-### 3 Agents
+### 4 Agents
 
 - `adr-historian` (Sonnet) — searches prior ADRs across configured repos
 - `fitness-author` (Sonnet, worktree-isolated) — scaffolds new fitness functions
 - `architecture-reviewer` (Opus) — structured architectural review
+- `adr-reviewer` (Sonnet) — reviews ADR documents: scope, feature smell, anatomy, lifecycle, higher-level citations, radar evidence
 
 ### 10 Hooks (opt-out via `SA_PLUGIN_HOOKS`)
 

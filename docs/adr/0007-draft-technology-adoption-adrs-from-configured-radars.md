@@ -4,7 +4,7 @@ Date: 2026-11-13
 
 ## Status
 
-Proposed
+Proposed (revised 2026-11-13 before acceptance: feature detail moved to the plan)
 
 Constrained by: [ADR-0006](0006-scope-adrs-to-architecture-and-load-higher-levels-in-panarchical-order.md)
 (scope test, ADR-file hook, Context Sources).
@@ -26,20 +26,16 @@ technology. Three gaps remain:
 
 ## Decision
 
-1. **Radar Sources table.** `ARCHITECTURE.md` may hold a `## Radar Sources`
-   table (Order, Radar, Location, Kind `file|url|mcp|thoughtworks`, Mode
-   `binding|advisory`). `/software-architecture:context` writes it.
-   `SA_RADAR_PATH` stays as the fallback and as Hook 3's input.
-2. **Ring-shaped ADRs.** The ADR skill's `references/technology-adoption.md`
-   requires a Radar evidence section and a radar row in the options table,
-   and adds ring-specific sections: Trial needs scope and exit criteria; Hold
-   needs `Deviates from:` and an upstream proposal; not on the radar is
-   treated as Assess.
-3. **`/software-architecture:adopt`** drafts the ADR end to end and offers
-   `/software-architecture:radar` to move the ring to match.
-4. **Hooks point to it.** Hook 10 lists the Radar Sources in order when an
-   ADR is written; Hook 3 suggests `/software-architecture:adopt` for a new
-   Hold, Trial or unknown dependency.
+**Radars are configured as an ordered list of sources of different kinds in
+`ARCHITECTURE.md`, and a technology-adoption ADR is drafted from those
+sources by the agent, not checked by a hook.** Hooks stay local and only
+name the sources, because a radar can be a remote service that a hook may
+not call (QUALITY.md, hooks-stay-local). The organization's own ring is
+binding input to the decision, so an adoption against a Hold ring is
+recorded as a deviation and offered upward, which closes the revolt loop
+between ADRs and the radar. Feature detail (table columns, the drafting
+command, the ring-specific ADR sections, hook messages) is specified in
+[docs/plans/2026-11-13-technology-adoption-from-radars-plan.md](../plans/2026-11-13-technology-adoption-from-radars-plan.md).
 
 ## Options considered
 

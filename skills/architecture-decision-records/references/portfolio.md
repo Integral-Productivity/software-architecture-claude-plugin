@@ -17,6 +17,7 @@ Run `/software-architecture:adr-audit`.
 | Check | Finding | Proposed action |
 |---|---|---|
 | Scope | Fails gate 1 or gate 2 (references/scope.md) | Reclassify; name the new home |
+| Feature smell | Decision lists features, not a structural choice | Split: trim the ADR, move features to a spec or issue |
 | Stale proposal | `Proposed` older than 30 days | Accept, reject, or close |
 | Broken supersession | `Superseded by` with no back-link, or a successor that does not exist | Fix both ends |
 | Missing triggers | `Accepted` with no revisit triggers | Add triggers |

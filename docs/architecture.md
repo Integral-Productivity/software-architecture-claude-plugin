@@ -46,7 +46,7 @@ internal building blocks:
 | `hooks/hooks.json` | Hook event registration |
 | `skills/` | 11 skill files (passive knowledge) |
 | `commands/` | 10 command entry points |
-| `agents/` | 3 subagent definitions |
+| `agents/` | 4 subagent definitions |
 | `hooks/` | 10 bash scripts emitting Claude Code hook JSON |
 | `docs/adr/` | Plugin-local ADRs |
 

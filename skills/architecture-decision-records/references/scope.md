@@ -34,6 +34,7 @@ and a real trade-off between genuine alternatives. All three.
 | Signal in the draft | It is a… | Home |
 |---|---|---|
 | "Today we…", a list of steps done, a timeline | Worklog | PR body, issue, session ledger |
+| "The command does…", "the table has columns…", "the user can…", acceptance criteria | Feature definition | PRD or specification in the product-management tool, or a GitHub issue |
 | "Steps: 1. … 2. …" for a future change | Plan | `docs/plans/`, tracker |
 | "To do X, run …" | Runbook or how-to | `docs/runbooks/`, `docs/` |
 | "Client Y does not support Z, so …" with no alternative weighed | Lesson or gotcha | `docs/solutions/` |
@@ -57,6 +58,28 @@ and a real trade-off between genuine alternatives. All three.
   repository architecture (platform level). Meeting cadences are not.
 - **Small but surprising.** If it fails "hard to reverse", a code comment or
   the PR body is enough, even when it is surprising.
+
+## Feature smell: an ADR that reads like a spec
+
+A decision about structure often arrives together with the feature that
+needed it. Split them.
+
+| In the ADR (structure and why) | In the spec or issue (what it does) |
+|---|---|
+| "Trigger the practice on file events, not only on prompt language, because…" | The hook's name, events, message text, opt-out key |
+| "Configuration lives in ARCHITECTURE.md as ordered Markdown tables, because hooks parse it with awk" | The table's columns and allowed values |
+| "A separate reviewer agent owns ADR-document review, because…" | The agent's checks and report format |
+
+Smells, any one is enough to look again:
+
+- The Decision section is a numbered list of things the system will do.
+- It names commands, flags, fields, columns, screens or messages.
+- It has acceptance criteria or user steps.
+- Removing the options table would lose nothing, because no structural
+  alternative was weighed.
+
+Fix: keep one paragraph that names the structural choice, keep the options
+and consequences, and link the spec or issue for the feature detail.
 
 ## When you decline to write an ADR
 

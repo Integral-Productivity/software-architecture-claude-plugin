@@ -167,7 +167,8 @@ if [[ "$MODE" == "new" ]]; then
 2. Route it: confirm the governance level (\`software-architecture:architecture-governance-levels\`) and state a \`Placement fit: <Strong|Weak|Misfit> — <reason>\` line in the commit message.
 3. ${REMEMBER}
 4. ${RADAR_NOTE}
-5. Start it as Proposed unless the user has already accepted the decision."
+5. Keep feature detail (commands, fields, user steps, acceptance criteria) out of the Decision: it belongs in a PRD, specification or issue, linked from the ADR.
+6. Start it as Proposed, and run the \`software-architecture:adr-reviewer\` agent on the draft before you commit it."
 else
   MESSAGE="📝 **ADR edit**: \`${TARGET}\` is an Architecture Decision Record. Apply the lifecycle rules of \`software-architecture:architecture-decision-records\` (references/lifecycle.md):
 - Do not rewrite the Decision of an Accepted ADR. Add a dated amendment, or write a superseding ADR.

@@ -33,7 +33,7 @@ The level a decision belongs to determines which repository holds its ADR and wh
 ### Architecture Decision Record (ADR)
 A durable record of a one-way-door decision — the context, the decision itself, the options weighed, and the triggers that would reopen it — written so a future reader understands not just what was decided but why.
 
-Each ADR is routed to a governance level, which determines where it lives and how it is numbered. A record is an ADR only when it passes the **ADR scope test**: it changes repository structure, solution structure, a quality-attribute trade-off, a technology selection or a contract, and it is hard to reverse, surprising without context and a real trade-off. Worklogs, plans, lessons and observed facts have their own homes.
+Each ADR is routed to a governance level, which determines where it lives and how it is numbered. A record is an ADR only when it passes the **ADR scope test**: it changes repository structure, solution structure, a quality-attribute trade-off, a technology selection or a contract, and it is hard to reverse, surprising without context and a real trade-off. Worklogs, plans, lessons, observed facts and feature definitions have their own homes. An ADR that lists what the system does instead of how it is shaped has the **feature smell**.
 
 ### ADR lifecycle
 The states one ADR moves through — Proposed, Accepted, Amended, Superseded, Deprecated, Rejected, Reclassified — with dated, two-way-linked transitions. An accepted Decision is never rewritten; it is amended additively or superseded.
