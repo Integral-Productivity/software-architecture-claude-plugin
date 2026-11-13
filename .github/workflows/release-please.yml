@@ -1,0 +1,95 @@
+name: release-please
+
+# Opens or updates a release PR on every push to `main`. Merging that PR is
+# the release act (ADR-0011): release-please writes the version into
+# `.claude-plugin/plugin.json`, `version.txt` and the manifest, writes
+# CHANGELOG.md, and creates the `vX.Y.Z` tag. The tag fires
+# `promote-stable.yml`, which fast-forwards `stable`.
+#
+# Pairs with release-please-config.json and .release-please-manifest.json.
+# Same mechanism as the other Integral-Productivity plugins (for example
+# self-org ADR-0010); the body follows
+# Integral-Productivity/reusable-workflows `reusable-release-please.yml@v1`.
+#
+# Why this is inlined and not a `uses:` call to that reusable
+# -----------------------------------------------------------
+# This repo is PUBLIC. The reusable forwards the vault-wide
+# OP_SERVICE_ACCOUNT_TOKEN, and its own header (RWF-004) says a public caller
+# must not do that: a leak would expose every App PEM in `ip-automation`.
+# This copy reads the same ip-releaser PEM from the `ip-automation-public`
+# vault with the SCOPED OP_RELEASER_PUBLIC_TOKEN that promote-stable.yml in
+# this repo already uses (devops-excellence ADR-045, ADR-064). No new
+# credential is introduced. When the reusable accepts the scoped token,
+# replace the job below with a one-line `uses:` call.
+#
+# Why App-mediated: enterprise policy stops GITHUB_TOKEN from opening PRs,
+# so release-please runs with an ip-releaser installation token. There is no
+# GITHUB_TOKEN fallback on purpose.
+#
+# Soft-failure contract: when an identifier, the PEM or the token is
+# missing, the job annotates and exits 0. It never blocks `main`.
+
+on:
+  push:
+    branches:
+      - main
+
+# release-please opens the release PR and pushes its branch and tag. The App
+# token carries those rights; GITHUB_TOKEN needs nothing beyond read.
+permissions:
+  contents: read
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify org variable identifiers are configured
+        id: app_id_check
+        env:
+          APP_ID: ${{ vars.IP_RELEASER_APP_ID }}
+          CLIENT_ID: ${{ vars.IP_RELEASER_APP_CLIENT_ID }}
+        run: |
+          missing=0
+          [ -n "${APP_ID:-}" ] || { echo "::warning::vars.IP_RELEASER_APP_ID is not set on this repo or the org."; missing=1; }
+          [ -n "${CLIENT_ID:-}" ] || { echo "::warning::vars.IP_RELEASER_APP_CLIENT_ID is not set on this repo or the org."; missing=1; }
+          if [ "$missing" = "1" ]; then
+            echo "::warning::Skipping release-please: required org variables are missing."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Read ip-releaser App PEM from 1Password (scoped public vault)
+        id: pem
+        if: steps.app_id_check.outputs.ready == 'true'
+        continue-on-error: true
+        uses: Integral-Productivity/reusable-workflows/.github/actions/read-pem-from-1p@8c04e03324d85c1f0432890946fdd04d30d64325 # v1.6.0
+        with:
+          op-service-account-token: ${{ secrets.OP_RELEASER_PUBLIC_TOKEN }}
+          item-path: op://ip-automation-public/ip-releaser/private_key
+
+      - name: Generate App token
+        id: app-token
+        if: steps.app_id_check.outputs.ready == 'true' && steps.pem.outcome == 'success'
+        continue-on-error: true
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.IP_RELEASER_APP_CLIENT_ID }}
+          private-key: ${{ steps.pem.outputs.private-key }}
+
+      - name: Error if the PEM read or token generation failed
+        if: steps.pem.outcome == 'failure' || steps.app-token.outcome == 'failure'
+        run: |
+          echo "::error::Could not mint an ip-releaser token. Check the repo secret OP_RELEASER_PUBLIC_TOKEN (1Password service account, read-only on the ip-automation-public vault), the item op://ip-automation-public/ip-releaser/private_key, and that the ip-releaser App is installed on this repo."
+
+      - name: Run release-please
+        if: steps.app-token.outcome == 'success'
+        uses: googleapis/release-please-action@v5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

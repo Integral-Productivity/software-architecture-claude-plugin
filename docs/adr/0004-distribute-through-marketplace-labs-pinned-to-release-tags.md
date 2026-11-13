@@ -9,6 +9,8 @@ Accepted 2026-08-22. Amended 2026-11-13.
 Provenance: [Integral-Productivity/software-architecture-claude-plugin#15](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/15) (also #10)
 
 Extends [0003](0003-single-source-architecture-method-and-repoint-consumers.md).
+Amended, on acceptance, by [0011](0011-release-please-writes-the-version-and-cuts-the-release-tag.md)
+(release-please replaces the manual release act).
 Supersedes the distribution mechanism described in
 [0002](0002-establish-software-architecture-plugin-and-its-scope.md).
 

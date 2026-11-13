@@ -123,3 +123,17 @@ The plugin is published from this repository and catalogued in the public
 marketplace and install `software-architecture@integral-productivity-labs`
 (see the README). Merges to `main` are the release surface — keep `main`
 releasable.
+
+### Versions and releases
+
+release-please is the only writer of the version (ADR-0011). Never edit
+`.claude-plugin/plugin.json` `version`, `version.txt` or
+`.release-please-manifest.json` by hand. Write a Conventional Commit and let
+its type drive the bump: `fix:` gives a patch, `feat:` a minor, and `feat!:`
+or a `BREAKING CHANGE:` footer a major. To force a version, add a
+`Release-As: X.Y.Z` footer to a commit.
+
+On each push to `main`, release-please opens or updates a release PR. Merging
+that PR is the release: it writes the version, creates the `vX.Y.Z` tag, and
+`promote-stable.yml` then moves `stable`. Each catalog then pins the new tag
+in its own PR (ADR-0010).
