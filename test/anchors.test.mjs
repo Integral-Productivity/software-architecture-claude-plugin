@@ -502,10 +502,18 @@ test('reminder: an unreadable STRATEGY.md never fails the hook', (t) => {
   if (process.getuid?.() === 0) return t.skip('root reads every file');
   const s = sandbox(t);
   const root = makeRepo(s.base);
-  chmodSync(join(root, 'STRATEGY.md'), 0o000);
-  t.after(() => chmodSync(join(root, 'STRATEGY.md'), 0o644));
+  const strategy = join(root, 'STRATEGY.md');
+  chmodSync(strategy, 0o000);
 
-  const result = run('anchors-reminder.sh', skill(root, 'compound-engineering:ce-work'), s.env);
+  // Restore the mode here, not in t.after(): sandbox() registered its own
+  // after-hook first, and it removes the directory before a later hook runs,
+  // so a deferred chmod fails with ENOENT on every non-root runner.
+  let result;
+  try {
+    result = run('anchors-reminder.sh', skill(root, 'compound-engineering:ce-work'), s.env);
+  } finally {
+    chmodSync(strategy, 0o644);
+  }
   assert.equal(result.status, 0);
   assert.equal(result.stderr, '');
 });
