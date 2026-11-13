@@ -39,7 +39,9 @@ Load `software-architecture:architecture-decision-records` and its
 5. **Anatomy** — context stands alone; decision is one paragraph; options on
    identical dimensions; consequences name a cost; revisit triggers are
    specific and measurable.
-6. **Lifecycle** — one dated status; supersession and amendment links exist
+6. **Lifecycle** — a `Provenance:` line names a GitHub issue, Productboard
+   entity or GlassFrog project by ID (an ADR without one cannot be
+   Accepted); one dated status; supersession and amendment links exist
    at both ends; an Accepted Decision was not rewritten (check
    `git log -p --follow` when the file has history).
 7. **Remember and revolt** — binding Context Sources that apply are cited on

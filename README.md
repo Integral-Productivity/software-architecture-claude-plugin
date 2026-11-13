@@ -66,6 +66,16 @@ All commands use the `/software-architecture:` prefix.
 
 Hooks 6 to 10 only warn; none of them blocks a call (ADR-0005, ADR-0006, SAE-027).
 
+### 1 Fitness function
+
+- `fitness/adr-lifecycle.mjs` — checks every ADR's mechanical rules (dated
+  status, `Provenance:` naming a GitHub issue, Productboard entity or
+  GlassFrog project, required sections, two-way supersession links). The
+  severity follows the lifecycle: Proposed is info, newly Accepted warns, and
+  Accepted fails once the curing period (default 30 days) has passed
+  (ADR-0009). Run it in a consumer repo's CI with
+  `node <plugin>/fitness/adr-lifecycle.mjs --since <adoption date>`.
+
 ### 1 Compound Pack
 
 - `packs/repo-anchors/` — rules that make [compound-engineering](https://github.com/EveryInc/compound-engineering-plugin) planning and
