@@ -136,7 +136,7 @@ Revisit this ADR when:
 
 ## Amendment 2026-11-13
 
-[ADR-0008](0008-review-adr-documents-with-a-dedicated-agent.md) (Proposed)
+[ADR-0008](0008-review-adr-documents-with-a-dedicated-agent.md) (Accepted 2026-11-13)
 adds a fourth subagent, `adr-reviewer`, for ADR-document review. The counts
 in the Decision above are the counts at acceptance; README.md holds the
 current counts.
