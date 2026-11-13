@@ -133,3 +133,10 @@ Revisit this ADR when:
   decomposition).
 - Hook activation noise drives users to disable > 2 hooks by default.
 - Multi-level governance evolves (e.g., new Team or Domain level added).
+
+## Amendment 2026-11-13
+
+[ADR-0008](0008-review-adr-documents-with-a-dedicated-agent.md) (Proposed)
+adds a fourth subagent, `adr-reviewer`, for ADR-document review. The counts
+in the Decision above are the counts at acceptance; README.md holds the
+current counts.
