@@ -4,7 +4,7 @@ Date: 2026-11-13
 
 ## Status
 
-Proposed
+Proposed (revised 2026-11-13 before acceptance: feature detail moved to the plan)
 
 Extends [ADR-0005](0005-warn-before-change-when-governing-documents-are-unread.md)
 (warn-mode hooks) to ADR files. Changes the ADR branch of the placement
@@ -47,31 +47,16 @@ level through a defined channel, not by silent drift.
 
 ## Decision
 
-**Define ADR scope and lifecycle in the skill, fire the practice on ADR files,
-and configure higher-level ADR sources in order in `ARCHITECTURE.md`.**
-
-1. **Scope test.** An ADR records a decision that changes the structure of the
-   repository, the structure of the solution it holds, a quality-attribute
-   trade-off, a technology selection, or a contract between parts or systems,
-   and that is hard to reverse, surprising without context, and the result of
-   a real trade-off. Every other record has a named non-ADR home (worklog,
-   plan, runbook, solution note, fact register, PR body, convention file).
-2. **Lifecycle.** One ADR moves through Proposed, Accepted, Amended,
-   Superseded, Deprecated, Rejected and Reclassified, with defined
-   transitions. An accepted Decision section is never rewritten.
-3. **ADR-file hook.** A new warn-mode PreToolUse hook (`adr`, Hook 10) fires
-   on a Write or Edit of an ADR file and on `adr new`. It names the skill, the
-   scope test, the lifecycle checks for an Edit, the Context Sources in order,
-   and the SAE-027-style `Placement fit:` line. The placement hook no longer
-   handles ADR paths, so an ADR gets one reminder.
-4. **Context Sources.** `ARCHITECTURE.md` may hold a `## Context Sources`
-   table, in load order from the slowest, widest level to the fastest,
-   narrowest, with a `binding` or `advisory` mode and a revolt channel per
-   row. `/software-architecture:context` writes it. The `adr-historian` agent
-   and the new hook read it.
-5. **Portfolio audit.** `/software-architecture:adr-audit` reviews all ADRs in
-   a repository against scope, lifecycle and the binding higher levels. It
-   proposes; it never edits.
+**The ADR practice is triggered by ADR file events as well as by prompt
+language, and the higher-level ADR homes a repository must read are
+configured as ordered, binding-or-advisory data in `ARCHITECTURE.md`.** The
+plugin reacts at the moment an ADR file is created or changed, in a warn-only
+hook, instead of relying on the agent to recognise decision language. The
+order of the configured homes encodes panarchy's remember link (slowest,
+widest level first), and each binding home names a channel for the revolt
+link, so a local departure is surfaced upward instead of drifting. Feature
+detail (the hook, its messages, the table columns, the scope test wording,
+the audit command) is specified in the plan linked above, not here.
 
 ## Options considered
 
@@ -81,6 +66,7 @@ and configure higher-level ADR sources in order in `ARCHITECTURE.md`.**
 | Fixes noise at the source | Partly | Yes, scope test at write time | Late, after the work |
 | Fits "warn before block" Boundary | Yes | Yes | No warn period yet |
 | Configuration surface | None | `ARCHITECTURE.md` (existing) | CI config |
+| Hooks stay local and stateless | Yes | Yes: config re-read per call | n/a |
 | Cost | Low | Medium: one hook, one command, prose | High: a judgment is hard to test |
 | Reversibility | High | High: opt-out key `adr` | Medium |
 

@@ -19,7 +19,7 @@ product's own plugin (see CONTRIBUTING.md for the dividing line).
 ```
 skills/        # 11 architecture-practice skills (the product)
 commands/      # /software-architecture:<verb> commands
-agents/        # adr-historian, fitness-author, architecture-reviewer
+agents/        # adr-historian, adr-reviewer, fitness-author, architecture-reviewer
 hooks/         # 10 hooks (opt-out via SA_PLUGIN_HOOKS); hooks/lib/ holds shared helpers
 packs/         # Compound Packs (repo-anchors) read by compound-engineering
 docs/adr/      # ADRs about THIS plugin's own structure (dogfooding)

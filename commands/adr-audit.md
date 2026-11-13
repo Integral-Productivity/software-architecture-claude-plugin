@@ -17,7 +17,10 @@ Review the ADR set of the current repository, using
    `ARCHITECTURE.md`. Dispatch the `software-architecture:adr-historian`
    agent to list the binding ADRs in that order. A source it cannot reach is
    reported as "not searched".
-3. **Run the checks** in `references/portfolio.md`: scope, stale proposal,
+3. **Dispatch `software-architecture:adr-reviewer`** on the ADR directory
+   for the per-ADR checks (scope, feature smell, anatomy, lifecycle, remember
+   and revolt, radar evidence). Then run the set-level checks in
+   `references/portfolio.md`: scope, stale proposal,
    broken supersession, missing or fired revisit triggers, duplicate,
    mis-routed, remember gap, conflict, revolt candidate, fitness link.
 4. **Report** one table, most severe first:

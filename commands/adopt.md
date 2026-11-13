@@ -27,7 +27,8 @@ Follow `software-architecture:architecture-decision-records`
    Proposed.
 7. **Offer the radar proposal.** If the ring should change, offer
    `/software-architecture:radar` with the ADR linked.
-8. **Confirm before commit.** Show the draft; commit on a `claude/<slug>`
+8. **Review the draft** with `software-architecture:adr-reviewer`.
+9. **Confirm before commit.** Show the draft; commit on a `claude/<slug>`
    branch only after the user agrees.
 
 ## Arguments

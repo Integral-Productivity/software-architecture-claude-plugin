@@ -60,6 +60,7 @@ If either gate fails, **do not write an ADR**. Put the record in its own home:
 | It is a… | Put it in |
 |---|---|
 | Worklog, session log, "what we did" | The PR body, the issue, or a session ledger |
+| Feature definition: what the solution does for its users, commands, options, fields, screens, acceptance criteria | A PRD or specification in the product-management tool, or a GitHub issue |
 | Plan or task breakdown | `docs/plans/` or the tracker |
 | Runbook or how-to | `docs/runbooks/` or `docs/` |
 | Lesson, gotcha, client or tool quirk | `docs/solutions/` (a solution note) |
@@ -67,6 +68,12 @@ If either gate fails, **do not write an ADR**. Put the record in its own home:
 | Status or progress update | The tracker or the PR |
 | Convention with no real alternative (naming, formatting) | `CONTRIBUTING.md`, a linter rule |
 | One-PR implementation choice | The PR body |
+
+**Feature smell.** An ADR records *how the system is shaped* and *why*, not
+*what it does*. If the Decision lists features (commands, flags, columns,
+fields, screens, user steps) instead of a choice among structural options,
+move the feature list to the spec or issue, and keep only the structural
+choice and its trade-off in the ADR, linked to the spec.
 
 When a gate fails, say which gate and name the home in one line. Do not
 "lean toward writing it": a missing ADR is found by review
@@ -104,6 +111,9 @@ Every ADR must answer six questions:
 Before marking an ADR `Accepted`, verify:
 
 - [ ] It passes both scope gates (architectural scope and the three triggers)
+- [ ] No feature smell: the Decision names a structural choice, not a list
+      of features; feature detail is linked, not copied
+- [ ] Reviewed by the `software-architecture:adr-reviewer` agent
 - [ ] Higher-level ADRs were read in Context Sources order and cited on a
       `Constrained by:` line; any departure is on a `Deviates from:` line
 - [ ] Context stands alone — no prior knowledge required
