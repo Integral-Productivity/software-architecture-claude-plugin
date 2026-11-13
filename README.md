@@ -149,6 +149,16 @@ already has STRATEGY.md or QUALITY.md.
   `${XDG_STATE_HOME:-~/.local/state}/software-architecture/anchors.log`. Set
   `SA_ANCHORS_LOG` to another path (for example a persisted path in a cloud
   container), or to `off`. No hook reads the log.
+- **Evidence over OpenTelemetry (optional):** set `SA_ANCHORS_OTLP` to an
+  OTLP/HTTP base URL (the hooks post to `<url>/v1/logs`) to also send each
+  evidence event as one OTLP log record (`service.name=software-architecture`,
+  attributes `anchors.event`, `anchors.repo.owner`, `anchors.repo.name`,
+  `anchors.tool`, `anchors.missing`, `anchors.unread`). Unset or `off` sends
+  nothing. The plugin names no endpoint and holds no credential: authenticate
+  through an egress proxy that injects it, or set `SA_ANCHORS_OTLP_HEADERS`
+  to `Name=value` pairs separated by commas. The send runs in one background
+  `curl` with a 2-second limit and never delays or fails a hook; without
+  `curl` it is skipped. The file log is written first, as before.
 
 ## Disabling individual hooks
 

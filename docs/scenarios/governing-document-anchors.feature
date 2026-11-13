@@ -156,3 +156,29 @@ Feature: Governing documents are read before an agent changes a repository
   Scenario: A file outside any git repository gets no warning
     When the agent edits a file that is not inside a git repository
     Then the hook adds no context
+
+  # Evidence: the optional OTLP sink (issue #96)
+
+  Scenario: An evidence event is also sent as one OTLP log record
+    Given SA_ANCHORS_OTLP names an OTLP/HTTP endpoint
+    When the agent edits a file in an unread repository
+    Then the evidence log gets one warn line
+    And the endpoint receives one log record at /v1/logs
+    And the record carries the event, repository owner and name, tool, and anchor names
+    And the record carries no prompt text and no local path
+
+  Scenario: A header variable adds request headers
+    Given SA_ANCHORS_OTLP_HEADERS lists "Name=value" pairs
+    When an evidence event is sent
+    Then each pair is a request header
+
+  Scenario: Nothing is sent when the endpoint is unset or off
+    Given SA_ANCHORS_OTLP is unset, or is "off"
+    When the agent edits a file in an unread repository
+    Then the evidence log gets one warn line
+    And no request is sent
+
+  Scenario: An unreachable endpoint never fails or delays the hook
+    Given SA_ANCHORS_OTLP names an endpoint that does not answer
+    When the agent edits a file in an unread repository
+    Then the hook exits 0 within its normal time and adds its warning

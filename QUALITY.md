@@ -160,7 +160,14 @@ factors:
         title: Hooks make no network call and read no credential or secret
         assessment: >
           Search hooks/ for network tools (curl, wget, nc, gh, git fetch/push)
-          and for reads of credential files or token variables.
+          and for reads of credential files or token variables. One opt-in
+          exception (issue #96): the anchors evidence sink in
+          hooks/lib/anchors-common.sh may send one OTLP log record per event,
+          only when the operator sets SA_ANCHORS_OTLP. It has no default
+          endpoint, runs in the background with a 2-second limit, and reads
+          no credential file; a header comes only from SA_ANCHORS_OTLP_HEADERS,
+          which the operator sets for this sink. Any other network call or
+          credential read, or a send with the variable unset, is a finding.
         ratings:
           outstanding: "No finding, and a test fails on any new network tool in hooks/."
           target: "No finding."
