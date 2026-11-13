@@ -10,15 +10,22 @@ trade-off analysis → ADR.
 
 ## Process
 
+0. **Scope test** — apply both gates in
+   `software-architecture:architecture-decision-records` (architectural
+   scope, and the three triggers). If either fails, stop: say which gate
+   failed and name the record's home. Do not write an ADR.
+
 1. **Frame the decision** — restate the user's intent as a forced
    single-sentence choice. If it's not a forced choice, ask the user to
    refine. (See `software-architecture:architectural-trade-offs` for the
    forced-choice discipline.)
 
-2. **Dispatch `adr-historian`** — search prior ADRs across the user's
-   `~/.claude/CLAUDE.md` routing table (Enterprise, Platform, System,
-   Service repos) for decisions relevant to the current one. Surface any
-   prior decisions that constrain or contradict the current direction.
+2. **Dispatch `adr-historian`** — search prior ADRs in the order of the
+   `## Context Sources` table in `ARCHITECTURE.md` (else the routing table)
+   for decisions relevant to the current one. Surface any prior decisions
+   that constrain or contradict the current direction. Cite binding ones on
+   a `Constrained by:` line; record a departure on `Deviates from:` and offer
+   an upstream proposal through the source's revolt channel.
 
 3. **Determine archetype** — if the decision matches a Hard Parts
    archetype (granularity, coupling, data ownership, sagas, contracts),
@@ -55,3 +62,4 @@ Otherwise, ask the user for it.
 - `software-architecture:trade-off` — run the trade-off analysis WITHOUT
   committing to an ADR.
 - `software-architecture:review` — review an existing diff against ADRs.
+- `software-architecture:adr-audit` — review the whole ADR set.

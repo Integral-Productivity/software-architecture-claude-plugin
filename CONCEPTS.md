@@ -33,7 +33,17 @@ The level a decision belongs to determines which repository holds its ADR and wh
 ### Architecture Decision Record (ADR)
 A durable record of a one-way-door decision — the context, the decision itself, the options weighed, and the triggers that would reopen it — written so a future reader understands not just what was decided but why.
 
-Each ADR is routed to a governance level, which determines where it lives and how it is numbered.
+Each ADR is routed to a governance level, which determines where it lives and how it is numbered. A record is an ADR only when it passes the **ADR scope test**: it changes repository structure, solution structure, a quality-attribute trade-off, a technology selection or a contract, and it is hard to reverse, surprising without context and a real trade-off. Worklogs, plans, lessons and observed facts have their own homes.
+
+### ADR lifecycle
+The states one ADR moves through — Proposed, Accepted, Amended, Superseded, Deprecated, Rejected, Reclassified — with dated, two-way-linked transitions. An accepted Decision is never rewritten; it is amended additively or superseded.
+
+### Context Sources
+The ordered table in `ARCHITECTURE.md` that lists the ADR homes a repository must read, slowest and widest level first, each `binding` or `advisory`, with a revolt channel.
+
+### Remember and revolt
+The two cross-scale links of panarchy (Gunderson and Holling) applied to ADRs. *Remember*: a decision loads the binding higher-level ADRs first and cites them on `Constrained by:`. *Revolt*: a decision that departs from a binding higher-level ADR records `Deviates from:` and goes upward through the revolt channel as a proposal.
+*Avoid:* override, exception (they hide the upward path).
 
 ### Technology radar
 A ringed map that places a technology in one of four adoption rings — Adopt, Trial, Assess, or Hold — assessed against both the external (Thoughtworks) radar and the organization's own.

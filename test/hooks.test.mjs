@@ -346,7 +346,17 @@ test('placement-pretooluse.sh reminds on a new command under a .claude directory
   }
 });
 
-for (const relPath of ['docs/adr/0009-x.md', '.claude-plugin/plugin.json']) {
+test('placement-pretooluse.sh leaves a new ADR to adr-pretooluse.sh (ADR-0006)', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  const dir = mkdtempSync(join(tmpdir(), 'sa-placement-'));
+  try {
+    assert.equal(placementContext(join(dir, 'docs/adr/0009-x.md')), '');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+for (const relPath of ['.claude-plugin/plugin.json']) {
   test(`placement-pretooluse.sh reminds on a new ${relPath} anywhere`, (t) => {
     if (!HAS_JQ) return t.skip('jq not installed');
     const dir = mkdtempSync(join(tmpdir(), 'sa-placement-'));
@@ -438,4 +448,161 @@ test('placement-pretooluse.sh exits 0 silently when jq is missing', () => {
   });
   assert.equal(result.status, 0, `exited ${result.status}:\n${result.stderr}`);
   assert.equal(result.stdout.trim(), '');
+});
+
+// --- adr-pretooluse.sh -------------------------------------------------------
+//
+// Hook 10 (ADR-0006) puts the ADR practice in front of the agent when an ADR
+// file is written or edited, or `adr new` runs, even with no decision phrase in
+// the prompt. It only adds context; it never denies. ARCHITECTURE.md content is
+// data: a hostile row must never execute.
+
+const ADR_HOOK = HOOKS.find((h) => basename(h) === 'adr-pretooluse.sh');
+
+function adrContext(payload, env = { SA_PLUGIN_HOOKS: 'adr' }) {
+  assert.ok(ADR_HOOK, 'adr-pretooluse.sh should exist');
+  const result = runHook(ADR_HOOK, JSON.stringify(payload), env);
+  assert.equal(result.status, 0, `exited ${result.status}:\n${result.stderr}`);
+  const out = result.stdout.trim();
+  if (out.length === 0) return '';
+  const parsed = JSON.parse(out);
+  assert.equal(parsed.hookSpecificOutput?.hookEventName, 'PreToolUse');
+  assert.equal(parsed.hookSpecificOutput?.permissionDecision, undefined, 'the hook must never decide');
+  return parsed.hookSpecificOutput?.additionalContext ?? '';
+}
+
+/** A temporary git repository root (a directory holding `.git`). */
+function withRepo(fn, { architecture } = {}) {
+  const dir = mkdtempSync(join(tmpdir(), 'sa-adr-'));
+  try {
+    mkdirSync(join(dir, '.git'));
+    mkdirSync(join(dir, 'docs', 'adr'), { recursive: true });
+    if (architecture) writeFileSync(join(dir, 'ARCHITECTURE.md'), architecture);
+    return fn(dir);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const write = (file_path, cwd) => ({ tool_name: 'Write', tool_input: { file_path, content: 'x' }, ...(cwd ? { cwd } : {}) });
+const edit = (file_path) => ({ tool_name: 'Edit', tool_input: { file_path, old_string: 'a', new_string: 'b' } });
+const bash = (command, cwd) => ({ tool_name: 'Bash', tool_input: { command }, cwd });
+
+const CONTEXT_SOURCES = `# Architecture
+
+## Governance Routing
+
+| Decision Level | Lives At | Prefix |
+|---|---|---|
+| System | docs/adr/ | numeric |
+
+## Context Sources
+
+| Order | Level | Source | ADR path | Prefix | Mode | Revolt channel |
+|---|---|---|---|---|---|---|
+| 1 | Enterprise | example-org/standards | docs/adr/ | STD- | binding | example-org/standards issues |
+| 2 | Platform | example-org/platform | docs/adr/ | PLAT- | binding | example-org/platform issues |
+| 3 | System | this repository | docs/adr/ | numeric | binding | — |
+
+## Notes
+`;
+
+test('adr-pretooluse.sh gives the scope test and Placement fit line for a new ADR', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  withRepo((dir) => {
+    const context = adrContext(write(join(dir, 'docs/adr/0007-use-postgres.md')));
+    assert.match(context, /software-architecture:architecture-decision-records/);
+    assert.match(context, /Scope test/);
+    assert.match(context, /worklog/);
+    assert.match(context, /Placement fit:/);
+    assert.match(context, /software-architecture:context/, 'no Context Sources: offer the setup command');
+  });
+});
+
+test('adr-pretooluse.sh lists Context Sources in their configured order', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  withRepo((dir) => {
+    const context = adrContext(write(join(dir, 'docs/adr/0007-x.md')));
+    const std = context.indexOf('example-org/standards');
+    const plat = context.indexOf('example-org/platform');
+    assert.ok(std > 0 && plat > std, `expected enterprise before platform:\n${context}`);
+    assert.match(context, /Constrained by:/);
+    assert.match(context, /Deviates from:/);
+    assert.match(context, /revolt via example-org\/standards issues/);
+    assert.doesNotMatch(context, /Decision Level/, 'only the Context Sources table is read');
+  }, { architecture: CONTEXT_SOURCES });
+});
+
+test('adr-pretooluse.sh gives lifecycle rules for an Edit of an ADR', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  withRepo((dir) => {
+    const file = join(dir, 'docs/adr/0001-x.md');
+    writeFileSync(file, '# 1. X\n');
+    const context = adrContext(edit(file));
+    assert.match(context, /ADR edit/);
+    assert.match(context, /Superseded/);
+    assert.match(context, /Do not rewrite the Decision/);
+    const overwrite = adrContext(write(file));
+    assert.match(overwrite, /ADR edit/, 'a Write over an existing ADR is an edit');
+  });
+});
+
+test('adr-pretooluse.sh honours a custom .adr-dir', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  withRepo((dir) => {
+    writeFileSync(join(dir, '.adr-dir'), 'architecture/decisions\n');
+    assert.match(adrContext(write(join(dir, 'architecture/decisions/0002-y.md'))), /Scope test/);
+  });
+});
+
+test('adr-pretooluse.sh fires on `adr new` and not on other commands', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  withRepo((dir) => {
+    assert.match(adrContext(bash('adr new Use event sourcing for orders', dir)), /Scope test/);
+    assert.match(adrContext(bash('cd docs && adr new -s 3 Replace X', dir)), /Scope test/);
+    assert.equal(adrContext(bash('adr list', dir)), '');
+    assert.equal(adrContext(bash('echo "read the adr new section"', dir)), '');
+  });
+});
+
+for (const relPath of ['src/adr.md', 'docs/notes/0001-x.md', 'docs/adr/README.md', 'docs/adr/0001-x.txt']) {
+  test(`adr-pretooluse.sh stays silent for ${relPath}`, (t) => {
+    if (!HAS_JQ) return t.skip('jq not installed');
+    withRepo((dir) => {
+      assert.equal(adrContext(write(join(dir, relPath))), '');
+    });
+  });
+}
+
+test('adr-pretooluse.sh honours the SA_PLUGIN_HOOKS opt-out', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  withRepo((dir) => {
+    const payload = write(join(dir, 'docs/adr/0007-x.md'));
+    assert.equal(adrContext(payload, { SA_PLUGIN_HOOKS: 'placement' }), '');
+    assert.match(adrContext(payload, { SA_PLUGIN_HOOKS: 'placement,adr' }), /Scope test/);
+  });
+});
+
+test('adr-pretooluse.sh never executes ARCHITECTURE.md content or the file path', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  const hostile = CONTEXT_SOURCES.replace('example-org/standards issues', '$(touch PWNED_ROW) `touch PWNED_TICK`');
+  withRepo((dir) => {
+    const context = adrContext(write(join(dir, 'docs/adr/0007-$(touch PWNED_PATH).md'), dir));
+    assert.match(context, /Scope test/);
+    for (const marker of ['PWNED_ROW', 'PWNED_TICK', 'PWNED_PATH']) {
+      assert.ok(!existsSync(join(dir, marker)) && !existsSync(join(ROOT, marker)), `${marker} was executed`);
+    }
+  }, { architecture: hostile });
+});
+
+test('prompt-submit.sh adds the ADR scope and lifecycle reminder for ADR language', (t) => {
+  if (!HAS_JQ) return t.skip('jq not installed');
+  const hook = HOOKS.find((h) => basename(h) === 'prompt-submit.sh');
+  const run = (prompt) => {
+    const out = runHook(hook, JSON.stringify({ prompt })).stdout.trim();
+    return out ? JSON.parse(out).hookSpecificOutput.additionalContext : '';
+  };
+  assert.match(run('Please supersede ADR-0003 with the new routing'), /adr-audit/);
+  assert.match(run('write an ADR for this'), /scope test/);
+  assert.equal(run('read the address list and fix the typo'), '');
 });

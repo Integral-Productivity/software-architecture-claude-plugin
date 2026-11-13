@@ -36,7 +36,9 @@ if [[ -e "$FILE_PATH" ]]; then
   exit 0
 fi
 
-ANYWHERE_RE='/(\.claude-plugin/plugin\.json|docs/adr/[^/]+\.md)$'
+# ADR files are handled by adr-pretooluse.sh (Hook 10, ADR-0006), whose
+# message carries the same `Placement fit:` line, so an ADR gets one reminder.
+ANYWHERE_RE='/\.claude-plugin/plugin\.json$'
 ROOTED_RE='^(.*)/(skills/[^/]+/SKILL\.md|commands/[^/]+\.md|agents/[^/]+\.md|hooks/[^/]+)$'
 
 MATCH=false

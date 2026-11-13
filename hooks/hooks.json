@@ -68,6 +68,15 @@
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/anchors-reminder.sh"
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/adr-pretooluse.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [

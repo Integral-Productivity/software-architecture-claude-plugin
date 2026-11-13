@@ -19,6 +19,9 @@ at which governance levels. Find this table in priority order:
 
 1. **`./ARCHITECTURE.md`** — repo-local routing (created by
    `/software-architecture:context`). This is the primary source of truth.
+   When it has a `## Context Sources` table, search the sources in its
+   `Order`, slowest and widest level first, and mark each finding `binding`
+   or `advisory` per its `Mode`.
 2. **A global routing table** — if the user keeps cross-repo routing in a
    global config (e.g. `~/.claude/CLAUDE.md`), use it as a fallback.
 3. **The current repo's `docs/adr/`** — always searchable even with no
@@ -79,9 +82,13 @@ A concise structured report:
 - Technology Radar: <X> is on **<ring>** as of <date>. See the org's
   custom radar (location in `ARCHITECTURE.md`).
 
+### Not searched
+- <source from Context Sources that was not reachable, or "none">
+
 ### Implications for the current decision
 <2–3 sentences synthesizing how the prior decisions constrain or
-inform the current question. Be honest if there are conflicts.>
+inform the current question. Name the binding ADRs for a `Constrained by:`
+line, and any conflict that would need a `Deviates from:` line.>
 ```
 
 ## What you do NOT do

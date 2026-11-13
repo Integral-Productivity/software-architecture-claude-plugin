@@ -35,14 +35,28 @@ depends on the routing table this command produces.
 4. **Identify cross-references** — does this repo's ADRs reference
    higher-level decisions? List the parent repos / paths.
 
-5. **C4 stubs (optional)** — ask if the user wants Context, Container,
+5. **Configure Context Sources (remember and revolt)** — build the
+   `## Context Sources` table (format in
+   `software-architecture:architecture-decision-records`
+   `references/panarchical-context.md`). Ask, in one batch:
+   - Which repositories or paths hold ADRs this repository must read?
+     Offer the homes from step 2 and any sibling repositories as options.
+   - In what order should they load? Propose slowest and widest first
+     (Enterprise, Platform, System, then peers); let the user reorder.
+   - Is each one `binding` or `advisory`?
+   - What is each binding source's revolt channel (issue tracker, proposal
+     process, governance meeting, or none)?
+   Write one row per source with its Order. The `adr-pretooluse.sh` hook and
+   the `adr-historian` agent read this table.
+
+6. **C4 stubs (optional)** — ask if the user wants Context, Container,
    Component stubs. Provide minimal templates with placeholder text.
 
-6. **Write `ARCHITECTURE.md`** at the chosen root (usually repo root).
+7. **Write `ARCHITECTURE.md`** at the chosen root (usually repo root).
    Use the template from
    `software-architecture:architecture-governance-levels` SKILL.md.
 
-7. **Commit** — propose a commit on a `claude/architecture-context`
+8. **Commit** — propose a commit on a `claude/architecture-context`
    branch. Confirm before commit (shared-state action).
 
 ## When to Re-Run
@@ -50,6 +64,7 @@ depends on the routing table this command produces.
 - Org structure changes (new platform repo, new product).
 - A new repo is created.
 - A misrouted ADR is discovered.
+- A higher-level repository is added, split, or changes its revolt channel.
 
 ## Arguments
 

@@ -188,6 +188,19 @@ searching for prior decisions.
 | Service / Component | (within service dir) | (numeric) |
 | Code | (in code, no ADR) | — |
 
+## Context Sources
+
+Load order for higher-level ADRs, slowest and widest first (remember);
+revolt channel for upstream proposals. Format:
+`software-architecture:architecture-decision-records`
+references/panarchical-context.md.
+
+| Order | Level | Source | ADR path | Prefix | Mode | Revolt channel |
+|---|---|---|---|---|---|---|
+| 1 | Enterprise | `<org>/<standards-repo>` | docs/adr/ | `<prefix>-` | binding | `<channel>` |
+| 2 | Platform | `<org>/<platform-repo>` | docs/adr/ | `<prefix>-` | binding | `<channel>` |
+| 3 | System | this repository | docs/adr/ | numeric | binding | — |
+
 ## C4 — System Context
 
 <diagram or description>

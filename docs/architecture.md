@@ -44,10 +44,10 @@ internal building blocks:
 |---|---|
 | `.claude-plugin/plugin.json` | Manifest |
 | `hooks/hooks.json` | Hook event registration |
-| `skills/` | 10 skill files (passive knowledge) |
-| `commands/` | 7 command entry points |
+| `skills/` | 11 skill files (passive knowledge) |
+| `commands/` | 9 command entry points |
 | `agents/` | 3 subagent definitions |
-| `hooks/` | 5 bash scripts emitting Claude Code hook JSON |
+| `hooks/` | 10 bash scripts emitting Claude Code hook JSON |
 | `docs/adr/` | Plugin-local ADRs |
 
 ## C4 — Component
@@ -66,7 +66,7 @@ The plugin's top characteristics (chosen via the
 | Observability | Firm | Hook firings logged; agent dispatches traceable |
 | Cost (cognitive) | Firm | Each skill description ≤ 4 sentences; clear trigger phrases |
 | Compatibility (with Claude Code) | Soft | Hooks emit valid Claude Code JSON; tested against current CLI |
-| Discoverability | Soft | Slash-command listing surfaces all 7 commands |
+| Discoverability | Soft | Slash-command listing surfaces all 9 commands |
 
 ## Cross-References
 
