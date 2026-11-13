@@ -4,10 +4,12 @@ Date: 2026-11-13
 
 ## Status
 
-Proposed 2026-11-13 (revised 2026-11-13 before acceptance, after an
-`adr-reviewer` run on this record: feature detail moved to the plan, links
-and options completed). The implementation merged with the proposal in
-PR #79.
+Accepted 2026-11-13 (proposed 2026-11-13; revised before acceptance, after
+an `adr-reviewer` run on this record: feature detail moved to the plan,
+links and options completed). The implementation merged with the proposal
+in PR #79.
+
+Provenance: [Integral-Productivity/software-architecture-claude-plugin#83](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/83)
 
 Extends [ADR-0002](0002-establish-software-architecture-plugin-and-its-scope.md)
 (adds a fourth subagent to the set it lists).

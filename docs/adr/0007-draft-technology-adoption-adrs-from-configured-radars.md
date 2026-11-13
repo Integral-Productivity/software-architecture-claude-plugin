@@ -4,7 +4,9 @@ Date: 2026-11-13
 
 ## Status
 
-Proposed (revised 2026-11-13 before acceptance: feature detail moved to the plan)
+Accepted 2026-11-13 (proposed 2026-11-13; revised before acceptance: feature detail moved to the plan)
+
+Provenance: [Integral-Productivity/software-architecture-claude-plugin#82](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/82)
 
 Constrained by: [ADR-0006](0006-scope-adrs-to-architecture-and-load-higher-levels-in-panarchical-order.md)
 (scope test, ADR-file hook, Context Sources).

@@ -4,7 +4,9 @@ Date: 2026-11-13
 
 ## Status
 
-Proposed (revised 2026-11-13 before acceptance: feature detail moved to the plan)
+Accepted 2026-11-13 (proposed 2026-11-13; revised before acceptance: feature detail moved to the plan)
+
+Provenance: [Integral-Productivity/software-architecture-claude-plugin#81](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/81)
 
 Extends [ADR-0005](0005-warn-before-change-when-governing-documents-are-unread.md)
 (warn-mode hooks) to ADR files. Changes the ADR branch of the placement
