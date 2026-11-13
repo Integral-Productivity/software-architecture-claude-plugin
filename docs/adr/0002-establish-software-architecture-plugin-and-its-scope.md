@@ -4,7 +4,12 @@ Date: 2026-05-27
 
 ## Status
 
-Accepted
+Accepted 2026-05-27. Amended 2026-11-13. Distribution mechanism superseded by
+[ADR-0004](0004-distribute-through-marketplace-labs-pinned-to-release-tags.md) (2026-08-22).
+
+Provenance: [Integral-Productivity/software-architecture-claude-plugin#90](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/90) (retrospective issue)
+
+Extended by [ADR-0003](0003-single-source-architecture-method-and-repoint-consumers.md).
 
 The distribution mechanism decided here — published from its own repository
 and installed as a Claude Code plugin marketplace — is superseded by
@@ -140,3 +145,19 @@ Revisit this ADR when:
 adds a fourth subagent, `adr-reviewer`, for ADR-document review. The counts
 in the Decision above are the counts at acceptance; README.md holds the
 current counts.
+
+## Amendment 2026-11-13: redaction and binding scope
+
+- The Decision was redacted on 2026-06-23 for the public release (PR #11,
+  closes #7). The redaction changed the stated distribution mechanism, which
+  ADR-0004 now supersedes; it did not change the scope decision.
+- **What binds:** a dedicated plugin for architecture as a practice, which
+  does not duplicate inner engineering loops, Lean operational discipline or
+  CI/CD machinery.
+- **What does not bind:** the skill, command, subagent and hook counts, and
+  the two-step migration. They were the inventory and the plan at acceptance.
+  README.md holds the current inventory.
+- This record has no options section. The alternatives weighed at acceptance
+  were not recorded, and this amendment does not reconstruct them.
+- Provenance points to a retrospective issue, because no work item existed at
+  acceptance (#86).

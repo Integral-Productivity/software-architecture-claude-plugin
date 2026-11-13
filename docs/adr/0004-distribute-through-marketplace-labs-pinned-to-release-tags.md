@@ -4,7 +4,9 @@ Date: 2026-08-22
 
 ## Status
 
-Accepted
+Accepted 2026-08-22. Amended 2026-11-13.
+
+Provenance: [Integral-Productivity/software-architecture-claude-plugin#15](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/15) (also #10)
 
 Extends [0003](0003-single-source-architecture-method-and-repoint-consumers.md).
 Supersedes the distribution mechanism described in
@@ -98,3 +100,21 @@ after the tag exists.
 - Release-tag creation is automated, or the designated-actor gate changes.
 - `plugin.json` version drift against the published tag is observed in
   practice, warranting a CI fitness check rather than a convention.
+
+## Amendment 2026-11-13
+
+Recorded during the remediation of pre-2026-11 ADRs (#86), from the audit's
+findings; the Decision above is unchanged.
+
+- **Interim deviation.** Since 2026-10-29 the catalog entry has pinned a
+  commit SHA, not a release tag, so that the change in PR #64 reached
+  consumers; #67 tracks the return to a tag pin. This departs from the
+  Decision until #67 closes.
+- **Trigger 2 fired.** A second catalog lists the plugin, so "the catalog
+  entry" is no longer singular. The owner re-affirms this decision or
+  supersedes it with an ADR that covers both catalogs.
+
+## Revisit triggers
+
+The triggers listed under Consequences above still apply. Trigger 2 has
+fired; see the amendment.

@@ -4,9 +4,13 @@ Date: 2026-10-29
 
 ## Status
 
-Accepted
+Accepted 2026-10-29. Amended 2026-11-13.
+
+Provenance: [Integral-Productivity/software-architecture-claude-plugin#91](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/91) (retrospective issue)
 
 Implements the "Governing-document anchors" track in [STRATEGY.md](../../STRATEGY.md).
+Constrained by: [ADR-0004](0004-distribute-through-marketplace-labs-pinned-to-release-tags.md)
+(the Compound Pack is pinned to a release tag).
 
 ## Context
 
@@ -109,3 +113,16 @@ the repository's `owner/name`.
 - compound-engineering ships any part of #1947 (remove the matching part of the
   reminder).
 - Compound Packs change their file format.
+
+## Amendment 2026-11-13: binding scope
+
+- **What binds:** governing-document checks are warn-only hooks plus a
+  Compound Pack, in this plugin; "consulted" means read in this session; the
+  gate stays silent until an owner list opts a repository in; a switch to deny
+  needs an owner-approved PR backed by log evidence.
+- **What does not bind:** the hook events, environment variable names,
+  opt-out file, log path and event names in the Decision above. They are the
+  implementation at acceptance, specified in #91, and may change without a
+  new ADR.
+- **Trigger due.** The warn period started 2026-10-29 (#67), so the two-week
+  trigger came due on 2026-11-12. The deny-mode decision is open.
