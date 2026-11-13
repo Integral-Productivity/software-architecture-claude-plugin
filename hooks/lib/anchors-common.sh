@@ -4,8 +4,8 @@
 # anchors-read.sh, anchors-gate.sh and anchors-reminder.sh source this file.
 #
 # "Anchors" are STRATEGY.md, QUALITY.md and ARCHITECTURE.md at a repository
-# root. Everything here reads files only: no git process, no network, and no
-# input is ever evaluated as code.
+# root. Everything here reads files only: no git process and no input is ever
+# evaluated as code. The one network call is the optional OTLP sink.
 
 # anchors_enabled KEY -- false when SA_PLUGIN_HOOKS is set and lacks KEY.
 anchors_enabled() {
@@ -105,19 +105,63 @@ anchors_marker_dir() {
   printf '%s/sa-anchors/%s/%s' "${TMPDIR:-/tmp}" "$1" "$repo_key"
 }
 
-# anchors_log EVENT REPO TOOL MISSING UNREAD -- append one evidence line.
-# Hooks only ever append; no hook reads the log. Failures are ignored.
+# anchors_log EVENT REPO TOOL MISSING UNREAD -- append one evidence line,
+# then send it to the optional OTLP sink. Hooks only ever append; no hook
+# reads the log. Failures are ignored.
 anchors_log() {
   local path="${SA_ANCHORS_LOG:-${XDG_STATE_HOME:-$HOME/.local/state}/software-architecture/anchors.log}"
-  [[ "$path" == "off" ]] && return 0
   local fields=() field
   for field in "$1" "${2:--}" "${3:--}" "${4:--}" "${5:--}"; do
     fields+=("${field//[$'\t\r\n']/}")
   done
-  {
-    mkdir -p "$(dirname "$path")" &&
-      printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${fields[@]}" >> "$path"
-  } 2>/dev/null || true
+  if [[ "$path" != "off" ]]; then
+    {
+      mkdir -p "$(dirname "$path")" &&
+        printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${fields[@]}" >> "$path"
+    } 2>/dev/null || true
+  fi
+  anchors_otlp_send "${fields[@]}"
+}
+
+# anchors_json_string TEXT -- TEXT as a JSON string literal.
+anchors_json_string() {
+  local s="${1//[[:cntrl:]]/}"
+  s="${s//\\/\\\\}"
+  printf '"%s"' "${s//\"/\\\"}"
+}
+
+# anchors_otlp_send EVENT REPO TOOL MISSING UNREAD -- send one OTLP/HTTP JSON
+# log record to $SA_ANCHORS_OTLP/v1/logs (issue #96). Unset or "off" sends
+# nothing. The plugin names no endpoint and holds no credential: the endpoint,
+# any headers ($SA_ANCHORS_OTLP_HEADERS, "Name=value,Name=value") and any
+# proxy come from the environment. The send runs in one background curl with
+# a 2-second budget, so it never delays or fails the hook. Attributes carry
+# no prompt text and no local path.
+anchors_otlp_send() {
+  local base="${SA_ANCHORS_OTLP:-}"
+  [[ -n "$base" && "$base" != "off" ]] || return 0
+  command -v curl >/dev/null 2>&1 || return 0
+  local owner="-" name="$2" attrs="" key value pair
+  if [[ "$2" == */* ]]; then owner="${2%%/*}"; name="${2#*/}"; fi
+  local keys=(event repo.owner repo.name tool missing unread)
+  local values=("$1" "$owner" "$name" "$3" "$4" "$5")
+  local i
+  for i in "${!keys[@]}"; do
+    attrs+="${attrs:+,}{\"key\":\"anchors.${keys[$i]}\",\"value\":{\"stringValue\":$(anchors_json_string "${values[$i]}")}}"
+  done
+  local body
+  body="{\"resourceLogs\":[{\"resource\":{\"attributes\":[{\"key\":\"service.name\",\"value\":{\"stringValue\":\"software-architecture\"}}]},\"scopeLogs\":[{\"scope\":{\"name\":\"software-architecture.anchors\"},\"logRecords\":[{\"timeUnixNano\":\"$(date -u +%s)000000000\",\"severityText\":\"INFO\",\"body\":{\"stringValue\":$(anchors_json_string "$1")},\"attributes\":[$attrs]}]}]}]}"
+  # Headers go to curl on stdin (-H @-), so a credential never shows in ps.
+  local headers="Content-Type: application/json" pairs=()
+  IFS=',' read -ra pairs <<< "${SA_ANCHORS_OTLP_HEADERS:-}"
+  for pair in ${pairs[@]+"${pairs[@]}"}; do
+    key="${pair%%=*}"; value="${pair#*=}"
+    key="${key//[[:space:]]/}"
+    [[ -n "$key" && "$pair" == *=* ]] && headers+=$'\n'"$key: ${value//[$'\r\n']/}"
+  done
+  curl -sS -m 2 -o /dev/null -X POST -H @- --data-binary "$body" "${base%/}/v1/logs" \
+    <<< "$headers" >/dev/null 2>&1 &
+  return 0
 }
 
 # anchors_strip_null_redirects COMMAND -- COMMAND without redirects that write
