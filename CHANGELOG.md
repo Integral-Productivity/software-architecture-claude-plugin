@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/Integral-Productivity/software-architecture-claude-plugin/compare/v0.2.0...v0.2.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* **test:** restore STRATEGY.md mode before the sandbox is removed ([#100](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/100)) ([2b414c1](https://github.com/Integral-Productivity/software-architecture-claude-plugin/commit/2b414c1235486342f3c66add115c05da327f6854))
+
 ## [0.2.0](https://github.com/Integral-Productivity/software-architecture-claude-plugin/compare/v0.1.1...v0.2.0) (2026-11-13)
 
 
