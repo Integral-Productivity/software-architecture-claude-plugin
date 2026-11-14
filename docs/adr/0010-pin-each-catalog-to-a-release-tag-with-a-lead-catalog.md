@@ -4,16 +4,18 @@ Date: 2026-11-13
 
 ## Status
 
-Proposed 2026-11-13
+Accepted 2026-11-13
 
 Provenance: [Integral-Productivity/software-architecture-claude-plugin#93](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/93)
 
-Supersedes, on acceptance: [ADR-0004](0004-distribute-through-marketplace-labs-pinned-to-release-tags.md)
+Supersedes: [ADR-0004](0004-distribute-through-marketplace-labs-pinned-to-release-tags.md)
 (its single-catalog pin rule; the release-tag mechanics carry over).
 Constrained by: [ADR-0003](0003-single-source-architecture-method-and-repoint-consumers.md)
 (this repository owns the version contract toward consumers),
 [ADR-0009](0009-bind-adr-rule-severity-to-lifecycle-state-and-require-provenance.md)
 (provenance and lifecycle).
+Amended, on acceptance, by [ADR-0011](0011-release-please-writes-the-version-and-cuts-the-release-tag.md)
+(release-please replaces the manual release act).
 
 ## Context
 
