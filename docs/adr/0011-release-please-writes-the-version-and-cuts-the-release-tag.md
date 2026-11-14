@@ -8,8 +8,10 @@ Proposed 2026-11-13
 
 Provenance: [Integral-Productivity/software-architecture-claude-plugin#67](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/67)
 
-Amends: [ADR-0004](0004-distribute-through-marketplace-labs-pinned-to-release-tags.md)
-(its manual release act; its tag pin and `stable` promotion stand).
+Amends: [ADR-0010](0010-pin-each-catalog-to-a-release-tag-with-a-lead-catalog.md),
+which carries over the release-tag mechanics of the superseded
+[ADR-0004](0004-distribute-through-marketplace-labs-pinned-to-release-tags.md)
+(its manual release act; the tag pin and `stable` promotion stand).
 Constrained by: [ADR-0010](0010-pin-each-catalog-to-a-release-tag-with-a-lead-catalog.md)
 (catalogs pin release tags; this ADR only changes who makes the tag).
 

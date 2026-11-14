@@ -11,7 +11,9 @@ Provenance: [Integral-Productivity/software-architecture-claude-plugin#2](https:
 Extends [0002](0002-establish-software-architecture-plugin-and-its-scope.md).
 
 The version contract left open here is resolved by
-[0004](0004-distribute-through-marketplace-labs-pinned-to-release-tags.md).
+[0010](0010-pin-each-catalog-to-a-release-tag-with-a-lead-catalog.md),
+which superseded [0004](0004-distribute-through-marketplace-labs-pinned-to-release-tags.md)
+on 2026-11-13.
 
 ## Context
 
@@ -123,12 +125,13 @@ this plugin's ADR.
   without a change of direction.
 - The paragraph "The deprecated-layer decommission is complete in principle"
   records status at acceptance, not a decision. It does not bind.
-- Revisit trigger 3 (tag/ref pinning) fired. ADR-0004 closes the version
-  contract that this record left open.
+- Revisit trigger 3 (tag/ref pinning) fired. ADR-0004 closed the version
+  contract that this record left open; ADR-0010 superseded ADR-0004 on
+  2026-11-13 and now holds that contract.
 - The "Revisit triggers" heading above uses level 3; the fitness function
   (ADR-0009) reads it through this amendment's section below.
 
 ## Revisit triggers
 
 The triggers listed under Consequences above still apply, except trigger 3,
-which fired and is closed by ADR-0004.
+which fired and is closed by ADR-0004, now superseded by ADR-0010.

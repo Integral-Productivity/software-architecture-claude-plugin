@@ -4,13 +4,15 @@ Date: 2026-08-22
 
 ## Status
 
+Superseded 2026-11-13 by [ADR-0010](0010-pin-each-catalog-to-a-release-tag-with-a-lead-catalog.md).
 Accepted 2026-08-22. Amended 2026-11-13.
 
 Provenance: [Integral-Productivity/software-architecture-claude-plugin#15](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/15) (also #10)
 
 Extends [0003](0003-single-source-architecture-method-and-repoint-consumers.md).
-Amended, on acceptance, by [0011](0011-release-please-writes-the-version-and-cuts-the-release-tag.md)
-(release-please replaces the manual release act).
+[0011](0011-release-please-writes-the-version-and-cuts-the-release-tag.md)
+(release-please replaces the manual release act) now amends ADR-0010, which
+carries this record's release-tag mechanics.
 Supersedes the distribution mechanism described in
 [0002](0002-establish-software-architecture-plugin-and-its-scope.md).
 
@@ -121,8 +123,9 @@ findings; the Decision above is unchanged.
 The triggers listed under Consequences above still apply. Trigger 2 has
 fired; see the amendment.
 
-## Proposed successor
+## Successor
 
 [ADR-0010](0010-pin-each-catalog-to-a-release-tag-with-a-lead-catalog.md)
-(Proposed 2026-11-13, #93) supersedes this ADR on acceptance. This record
-stays Accepted until then.
+supersedes this ADR, accepted by the owner on 2026-11-13 (#93). Its
+single-catalog pin rule is replaced by a lead catalog with followers. The
+release-tag mechanics in this record carry over into ADR-0010.
