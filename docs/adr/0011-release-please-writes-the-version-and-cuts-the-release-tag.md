@@ -4,7 +4,7 @@ Date: 2026-11-13
 
 ## Status
 
-Proposed 2026-11-13
+Accepted 2026-11-13
 
 Provenance: [Integral-Productivity/software-architecture-claude-plugin#67](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/67)
 
