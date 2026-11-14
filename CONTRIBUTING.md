@@ -133,7 +133,10 @@ its type drive the bump: `fix:` gives a patch, `feat:` a minor, and `feat!:`
 or a `BREAKING CHANGE:` footer a major. To force a version, add a
 `Release-As: X.Y.Z` footer to a commit.
 
-On each push to `main`, release-please opens or updates a release PR. Merging
-that PR is the release: it writes the version, creates the `vX.Y.Z` tag, and
-`promote-stable.yml` then moves `stable`. Each catalog then pins the new tag
+On each push to `main`, release-please opens or updates a release PR, and
+the org auto-merge workflow merges it within minutes. That merge is the
+release: it writes the version, creates the `vX.Y.Z` tag, and
+`promote-stable.yml` then moves `stable`. To hold a release, apply the
+`hold-for-review` label to the release PR as soon as it opens. Keep `main`
+green: `main` has no required checks, so a release can ship on a red test. Each catalog then pins the new tag
 in its own PR (ADR-0010).
