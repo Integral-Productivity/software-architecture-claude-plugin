@@ -4,7 +4,7 @@ Date: 2026-11-13
 
 ## Status
 
-Accepted 2026-11-13
+Accepted 2026-11-13. Amended 2026-11-13 by ADR-0011.
 
 Provenance: [Integral-Productivity/software-architecture-claude-plugin#93](https://github.com/Integral-Productivity/software-architecture-claude-plugin/issues/93)
 
@@ -14,7 +14,7 @@ Constrained by: [ADR-0003](0003-single-source-architecture-method-and-repoint-co
 (this repository owns the version contract toward consumers),
 [ADR-0009](0009-bind-adr-rule-severity-to-lifecycle-state-and-require-provenance.md)
 (provenance and lifecycle).
-Amended, on acceptance, by [ADR-0011](0011-release-please-writes-the-version-and-cuts-the-release-tag.md)
+Amended by [ADR-0011](0011-release-please-writes-the-version-and-cuts-the-release-tag.md)
 (release-please replaces the manual release act).
 
 ## Context
