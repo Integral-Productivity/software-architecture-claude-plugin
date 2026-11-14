@@ -45,8 +45,12 @@ token scoped to the single `ip-releaser` PEM.
 **release-please is the only writer of this plugin's version and the only
 creator of its release tags.** People and agents describe changes with
 Conventional Commits and never edit `.release-please-manifest.json`,
-`version.txt` or `plugin.json` `$.version`. The release act is merging the
-release PR. Its tag fires the existing `promote-stable.yml` unchanged.
+`version.txt` or `plugin.json` `$.version`. The release act is the merge of
+the release PR. The org auto-merge workflow merges `release-please--*`
+branches without a person, so every releasable push to `main` ships as a
+release within minutes. A person holds a release by applying the
+`hold-for-review` label to the release PR. The tag fires the existing
+`promote-stable.yml` unchanged.
 
 The workflow uses the scoped release token that `promote-stable.yml` already
 holds, not the vault-wide token, until the shared reusable accepts the
@@ -56,8 +60,8 @@ scoped one.
 
 | Dimension | A. Keep manual tags (ADR-0004) | B. release-please, scoped token (chosen) | C. release-please via the shared reusable, vault-wide token |
 |---|---|---|---|
-| Release actually happens | Has not, since 2026-10-29 | Each time the release PR merges | Each time the release PR merges |
-| Who can release | Designated release actor only | Anyone who can merge the release PR | Same as B |
+| Release actually happens | Has not, since 2026-10-29 | On each releasable push to `main` | On each releasable push to `main` |
+| Who can release | Designated release actor only | Anyone whose PR merges to `main`; the release PR merges automatically | Same as B |
 | Version drift (`plugin.json` vs tag) | Possible | One writer, no drift | One writer, no drift |
 | Credential exposure on a public runner | None | One PEM (already exposed to promote-stable) | Every App PEM in the vault |
 | Matches the other org plugins | No | Yes, mechanism; inline body | Yes, fully |
@@ -65,11 +69,17 @@ scoped one.
 
 ## Consequences
 
-- Easier: a release is one merge, and the version, tag, changelog and
-  `stable` move together.
+- Easier: no person has to remember to release. The version, tag,
+  changelog and `stable` move together.
 - Easier: catalog pins can name a real tag again, as ADR-0010 requires.
-- Harder: a release PR can sit unmerged; the shipped version then lags
-  `main`. A release-latency alarm like self-org's is a possible follow-up.
+- Harder: this repo is Tier 3, and its `main` ruleset requires no status
+  check. Auto-merge can therefore merge a release PR while the `Test`
+  workflow is red, and a tag cannot be undone. This happened with
+  `v0.2.0` on 2026-11-13 (a test-cleanup bug only). The gap is reported in
+  devops-excellence#582.
+- Limit: `hold-for-review` holds a release only when it is applied before
+  auto-merge arms, which is seconds after the release PR opens
+  (devops-excellence#582).
 - Limit: the catalog bump is still a separate PR in each catalog
   (ADR-0010). This decision does not automate it.
 - Cost: the workflow body is an inline copy that nothing checks against the
@@ -79,5 +89,7 @@ scoped one.
 
 - The shared reusable accepts the scoped release token: switch to a
   one-line `uses:` call.
-- A release PR stays open longer than a week in practice.
+- A release ships with a failing check, or a held release PR merges anyway.
+- The org auto-merge stops merging `release-please--*` branches without a
+  person: then the release act becomes a human merge again.
 - `plugin.json` version differs from the latest tag on `main`.

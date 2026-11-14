@@ -77,6 +77,6 @@ Full detail in [CONTRIBUTING.md](CONTRIBUTING.md). The essentials:
 Published from this repository and catalogued in the public
 `Integral-Productivity/marketplace-labs` marketplace. Consumers add that
 marketplace and install `software-architecture@integral-productivity-labs`
-(see README). Merging the release PR that release-please opens is the release act
-(ADR-0011); never hand-edit the version. Merging to `main` is the release surface — keep `main`
+(see README). Every releasable merge to `main` is released automatically: release-please
+opens a release PR and the org auto-merge merges it (ADR-0011). Never hand-edit the version. Merging to `main` is the release surface — keep `main`
 releasable.

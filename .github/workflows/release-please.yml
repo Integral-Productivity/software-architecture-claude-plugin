@@ -1,7 +1,8 @@
 name: release-please
 
-# Opens or updates a release PR on every push to `main`. Merging that PR is
-# the release act (ADR-0011): release-please writes the version into
+# Opens or updates a release PR on every push to `main`. The org auto-merge
+# workflow merges `release-please--*` branches without a person, and that
+# merge is the release act (ADR-0011): release-please writes the version into
 # `.claude-plugin/plugin.json`, `version.txt` and the manifest, writes
 # CHANGELOG.md, and creates the `vX.Y.Z` tag. The tag fires
 # `promote-stable.yml`, which fast-forwards `stable`.
