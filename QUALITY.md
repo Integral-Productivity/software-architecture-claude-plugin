@@ -458,7 +458,7 @@ areas:
         title: Release integrity
         description: >
           The degree to which main stays releasable and consumers get pinned
-          tags (ADR-0004).
+          tags (ADR-0010, which superseded ADR-0004).
         requirements:
           main-releasable-and-tagged:
             title: Main passes CI at every commit, and each release is a tag the marketplace pins
@@ -621,7 +621,7 @@ and ADRs. They enter through configuration (STRATEGY.md Boundaries), and each
 organization judges them in its own model.
 
 Lifecycle is **active production**, chosen by the operator although the
-version is 0.1.0, because the plugin is already installed from a public
+version is below 1.0, because the plugin is already installed from a public
 marketplace. Risk tolerance is **moderate**: poor quality has a real cost, but
 consumers can opt out of each hook and pin an earlier tag.
 
